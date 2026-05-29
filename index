@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>にほん電脳横丁 | 日本の電脳文化圏を創る</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;700;800&family=Noto+Sans+JP:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    /* ══════════════════════════════════
+       VARIABLES & RESET
+    ══════════════════════════════════ */
+    :root {
+      --cyan:  #00ccff;
+      --blue:  #0055ff;
+      --nav-h: 164px;
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { height:100%; }
+
+    body {
+      height: 100%;
+      overflow: hidden;
+      background-image: url('./bg_wide.jpg');
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      color: #ddd4ff;
+      font-family: 'Noto Sans JP', sans-serif;
+    }
+
+    /* ── canvas (sakura + particles) ── */
+    #bg-canvas {
+      position: fixed; inset: 0;
+      width: 100%; height: 100%;
+      pointer-events: none; z-index: 1;
+    }
+
+    /* ── site wrapper ── */
+    .site-wrapper {
+      position: relative;
+      width: 100%; height: 100vh;
+      display: flex; flex-direction: column;
+      z-index: 2; overflow: hidden;
+    }
+
+    /* ══════════════════════════════════
+       HERO TEXT OVERLAY
+    ══════════════════════════════════ */
+    .hero {
+      flex: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-end;
+      padding: 0 24px 3vh;
+      position: relative; z-index: 10;
+      text-align: center;
+    }
+
+    .hero-catch {
+      font-family: 'Shippori Mincho B1', serif;
+      font-size: clamp(1.44rem, 2.7vw, 2rem);
+      letter-spacing: 0.32em;
+      color: #ffffffe6;
+      text-shadow:
+        0 0 16px rgba(130, 80, 255, 0.75),
+        0 2px 6px rgba(0, 0, 0, 0.85);
+    }
+
+    .hero-divider {
+      width: clamp(260px, 42vw, 520px);
+      height: 1px;
+      margin: 1.6rem auto;
+      background: linear-gradient(90deg,
+        transparent,
+        rgba(0, 160, 255, 0.65) 30%,
+        rgba(160, 0, 255, 0.65) 70%,
+        transparent);
+      box-shadow: 0 0 12px rgba(0, 120, 255, 0.35);
+      position: relative;
+    }
+    .hero-divider::before,
+    .hero-divider::after {
+      content: '◇';
+      position: absolute; top: 50%; transform: translateY(-50%);
+      font-size: 0.7rem;
+      color: rgba(0, 190, 255, 0.85);
+      text-shadow: 0 0 8px rgba(0, 190, 255, 0.9);
+    }
+    .hero-divider::before { left: -16px; }
+    .hero-divider::after  { right: -16px; }
+
+    .hero-desc {
+      max-width: 700px;
+      font-size: clamp(1.1rem, 2.0vw, 1.6rem);
+      font-weight: 300;
+      line-height: 2.1;
+      color: #ffffffe6;
+      text-shadow:
+        0 0 10px rgba(50, 0, 160, 0.6),
+        0 2px 8px rgba(0, 0, 0, 0.92);
+    }
+
+    /* ══════════════════════════════════
+       BOTTOM NAVIGATION (2×)
+    ══════════════════════════════════ */
+    .bottom-nav {
+      height: var(--nav-h);
+      display: flex; align-items: stretch;
+      position: relative; z-index: 20;
+      background: rgba(3, 0, 12, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+    /* glow line */
+    .bottom-nav::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(0, 110, 255, 0.9) 25%,
+        rgba(180, 0, 255, 0.9) 75%,
+        transparent 100%);
+      box-shadow: 0 0 20px rgba(60, 0, 200, 0.55);
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex; align-items: center; justify-content: center;
+      text-decoration: none;
+      color: rgba(185, 165, 255, 0.82);
+      font-family: 'Shippori Mincho B1', serif;
+      font-size: clamp(1.4rem, 2.6vw, 2.1rem);
+      letter-spacing: 0.15em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .nav-item::after {
+      content: '';
+      position: absolute; bottom: 20px;
+      left: 25%; right: 25%; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+      box-shadow: 0 0 10px var(--cyan);
+      transform: scaleX(0); transition: transform 0.3s ease;
+    }
+    .nav-item:hover {
+      color: #fff;
+      text-shadow: 0 0 12px var(--cyan), 0 0 26px var(--blue);
+      background: rgba(0, 50, 200, 0.08);
+    }
+    .nav-item:hover::after { transform: scaleX(1); }
+
+    .nav-sep {
+      width: 1px;
+      background: rgba(100, 50, 200, 0.38);
+      margin: 40px 0;
+    }
+
+    /* ══════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════ */
+    @media (max-width: 768px) {
+      body {
+        overflow-y: auto;
+        background-image: url('./bg_portrait.jpg');
+        background-position: top center;
+      }
+      .site-wrapper { height: auto; min-height: 100svh; }
+      .hero {
+        min-height: calc(100svh - var(--nav-h));
+        padding-bottom: 5vh;
+      }
+      :root { --nav-h: 88px; }
+      .hero-catch  { font-size: clamp(1rem, 4vw, 1.4rem); letter-spacing: 0.2em; }
+      .hero-desc   { font-size: clamp(0.88rem, 3.2vw, 1.15rem); line-height: 1.9; }
+      .hero-divider { width: min(78vw, 300px); margin: 1.2rem auto; }
+      .nav-item    { font-size: clamp(0.85rem, 3.2vw, 1.15rem); letter-spacing: 0.07em; }
+      .nav-sep     { margin: 22px 0; }
+      .bottom-nav  { position: sticky; bottom: 0; }
+    }
+
+    @media (max-width: 420px) {
+      .hero-catch { font-size: 0.92rem; }
+      .hero-desc  { font-size: 0.82rem; }
+      .nav-item   { font-size: 0.8rem; letter-spacing: 0.04em; }
+    }
+
+    /* low-height laptop: scale back slightly */
+    @media (max-height: 680px) and (min-width: 769px) {
+      :root { --nav-h: 120px; }
+      .hero-catch { font-size: 1.5rem; }
+      .hero-desc  { font-size: 1.2rem; line-height: 1.9; }
+      .hero-divider { margin: 1.1rem auto; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<div class="site-wrapper">
+
+  <!-- Hero text overlay -->
+  <main class="hero">
+    <p class="hero-catch">― 日本の電脳文化圏を創る ―</p>
+    <div class="hero-divider"></div>
+    <p class="hero-desc">
+      Web3、AI、デジタルアート、ゲーム、VTuber——<br>
+      伝統文化とテクノロジーが交差する"現代版の横丁"。<br>
+      国内外のクリエイター・プロジェクトが集い、交流・共創・発信を行うコミュニティです。
+    </p>
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <a class="nav-item" href="about.html">【 運営ご紹介 】</a>
+    <div class="nav-sep" aria-hidden="true"></div>
+    <a class="nav-item" href="projects.html">【 参加プロジェクト 】</a>
+    <div class="nav-sep" aria-hidden="true"></div>
+    <a class="nav-item" href="contact.html">【 問い合わせ 】</a>
+  </nav>
+</div>
+
+<script>
+  /* Sakura + digital particle canvas */
+  const canvas = document.getElementById('bg-canvas');
+  const ctx    = canvas.getContext('2d');
+
+  function resize() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  /* Sakura Petal */
+  class Petal {
+    constructor(preplace) { this.reset(preplace); }
+    reset(placed) {
+      this.x      = Math.random() * canvas.width;
+      this.y      = placed ? Math.random() * canvas.height : -20;
+      this.sz     = Math.random() * 5.5 + 2.5;
+      this.vx     = (Math.random() - 0.5) * 0.55;
+      this.vy     = Math.random() * 1.1 + 0.45;
+      this.rot    = Math.random() * Math.PI * 2;
+      this.vrot   = (Math.random() - 0.5) * 0.04;
+      this.wob    = Math.random() * Math.PI * 2;
+      this.wobSpd = Math.random() * 0.018 + 0.008;
+      this.alpha  = Math.random() * 0.5 + 0.12;
+      const hue   = Math.floor(Math.random() * 35 + 300);
+      const sat   = Math.floor(Math.random() * 20 + 70);
+      const lum   = Math.floor(Math.random() * 20 + 65);
+      this.col    = `hsla(${hue},${sat}%,${lum}%,${this.alpha})`;
+    }
+    update() {
+      this.wob += this.wobSpd;
+      this.x   += this.vx + Math.sin(this.wob) * 0.45;
+      this.y   += this.vy;
+      this.rot += this.vrot;
+      if (this.y > canvas.height + 25) this.reset(false);
+    }
+    draw() {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.rot);
+      ctx.globalAlpha = this.alpha;
+      ctx.fillStyle   = this.col;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, this.sz, this.sz * 0.52, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = this.alpha * 0.45;
+      ctx.fillStyle   = 'rgba(255,215,240,0.85)';
+      ctx.beginPath();
+      ctx.ellipse(-this.sz * 0.22, -this.sz * 0.16, this.sz * 0.32, this.sz * 0.18, -0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  /* Digital Particle */
+  class Particle {
+    constructor() { this.reset(); }
+    reset() {
+      this.x     = Math.random() * canvas.width;
+      this.y     = Math.random() * canvas.height;
+      this.sz    = Math.random() * 1.8;
+      this.vx    = (Math.random() - 0.5) * 0.22;
+      this.vy    = (Math.random() - 0.5) * 0.22;
+      this.life  = Math.random() * 220 + 80;
+      this.maxL  = this.life;
+      this.alpha = Math.random() * 0.28 + 0.05;
+      const cols = ['#0077ff','#00ccff','#aa00ff','#ff44aa','#00ffcc'];
+      this.col   = cols[Math.floor(Math.random() * cols.length)];
+    }
+    update() {
+      this.x += this.vx; this.y += this.vy;
+      this.life--;
+      if (this.life <= 0) this.reset();
+    }
+    draw() {
+      const a = this.alpha * (this.life / this.maxL);
+      ctx.globalAlpha = a;
+      ctx.fillStyle   = this.col;
+      ctx.shadowBlur  = 7;
+      ctx.shadowColor = this.col;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.sz, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+  }
+
+  const petals    = [
+    ...Array.from({ length: 28 }, () => new Petal(true)),
+    ...Array.from({ length: 36 }, () => new Petal(false)),
+  ];
+  const particles = Array.from({ length: 45 }, () => new Particle());
+
+  function animate() {
+    requestAnimationFrame(animate);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.globalAlpha = 1;
+    particles.forEach(p => { p.update(); p.draw(); });
+    ctx.globalAlpha = 1;
+    petals.forEach(p   => { p.update(); p.draw(); });
+    ctx.globalAlpha = 1;
+  }
+  animate();
+
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.addEventListener('click', () => {
+      el.style.background = 'rgba(0,80,220,0.14)';
+      setTimeout(() => { el.style.background = ''; }, 180);
+    });
+  });
+</script>
+</body>
+</html>
