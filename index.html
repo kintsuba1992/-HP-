@@ -178,16 +178,13 @@
       .site-wrapper { height: auto; min-height: 100svh; }
       .hero {
         min-height: calc(100svh - var(--nav-h));
-        padding-bottom: 5vh;
+        padding-bottom: 0;
       }
-      /* 縦長画像のロゴは横長より下まで続くため70vhに拡大 */
-      .hero-gap    { min-height: 70vh; }
       :root { --nav-h: 88px; }
       .hero-catch  { font-size: clamp(1rem, 4vw, 1.4rem); letter-spacing: 0.2em; }
       .hero-desc   { font-size: clamp(0.88rem, 3.2vw, 1.15rem); line-height: 1.9; }
       .hero-divider { width: min(78vw, 300px); margin: 1.2rem auto; }
-      /* ナビ：折り返し防止 */
-      .nav-item    { font-size: clamp(0.6rem, 2.4vw, 0.85rem); letter-spacing: 0; white-space: nowrap; }
+      .nav-item    { font-size: clamp(0.85rem, 3.2vw, 1.15rem); letter-spacing: 0.07em; }
       .nav-sep     { margin: 22px 0; }
       .bottom-nav  { position: sticky; bottom: 0; }
     }
@@ -195,7 +192,7 @@
     @media (max-width: 420px) {
       .hero-catch { font-size: 0.92rem; }
       .hero-desc  { font-size: 0.82rem; }
-      .nav-item   { font-size: clamp(0.55rem, 2.2vw, 0.78rem); }
+      .nav-item   { font-size: 0.8rem; letter-spacing: 0.04em; }
     }
 
     /* ラップトップ（高さ900px以下）: navを縮小してオーバーフロー防止 */
