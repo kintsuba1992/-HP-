@@ -195,12 +195,24 @@
       .nav-item   { font-size: 0.8rem; letter-spacing: 0.04em; }
     }
 
-    /* low-height laptop: scale back slightly */
+    /* ラップトップ（高さ900px以下）: navを縮小してオーバーフロー防止 */
+    @media (max-height: 900px) and (min-width: 769px) {
+      :root { --nav-h: 110px; }
+      .nav-sep     { margin: 28px 0; }
+      .nav-item::after { bottom: 12px; }
+      .hero-catch  { font-size: 1.5rem; }
+      .hero-desc   { font-size: 1.2rem; line-height: 1.6; }
+      .hero-divider { margin: 0.6rem auto; }
+    }
+
+    /* さらに低い高さ（680px以下） */
     @media (max-height: 680px) and (min-width: 769px) {
-      :root { --nav-h: 120px; }
-      .hero-catch { font-size: 1.5rem; }
-      .hero-desc  { font-size: 1.2rem; line-height: 1.9; }
-      .hero-divider { margin: 1.1rem auto; }
+      :root { --nav-h: 90px; }
+      .nav-sep     { margin: 20px 0; }
+      .hero-catch  { font-size: 1.3rem; }
+      .hero-desc   { font-size: 1rem; line-height: 1.5; }
+      .hero-divider { margin: 0.4rem auto; }
+      .hero-gap    { min-height: 60vh; }
     }
   </style>
 </head>
