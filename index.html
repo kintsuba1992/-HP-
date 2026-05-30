@@ -175,19 +175,21 @@
         background-image: url('./bg_portrait.jpg');
         background-position: top center;
       }
-      /* dvh = ブラウザUIを除いた実効高さ。Telegramなど全アプリ内ブラウザ対応 */
+      /* dvh = ブラウザUIを除いた実効高さ */
       .site-wrapper { height: 100dvh; overflow: hidden; }
       .hero {
-        overflow: hidden;
-        padding-bottom: var(--nav-h); /* fixed navの下に隠れないよう確保 */
+        /* overflow:hiddenは付けない → テキストが切り取られる原因になる */
+        padding-bottom: var(--nav-h);
       }
       :root { --nav-h: 88px; }
+      /* hero-gapをdvh単位に統一（vh=ブラウザUI込みの高さで不一致が起きる） */
+      .hero-gap    { min-height: 65dvh; }
       .hero-catch  { font-size: clamp(1rem, 4vw, 1.4rem); letter-spacing: 0.2em; }
       .hero-desc   { font-size: clamp(0.88rem, 3.2vw, 1.15rem); line-height: 1.75; }
       .hero-divider { width: min(78vw, 300px); margin: 0.6rem auto; }
       .nav-item    { font-size: clamp(0.6rem, 2.4vw, 0.85rem); letter-spacing: 0; white-space: nowrap; }
       .nav-sep     { margin: 22px 0; }
-      /* fixed: コンテンツ高さ・ブラウザ種別に関係なく常に画面最下部に固定 */
+      /* fixed: ブラウザ・アプリ内ブラウザ問わず常に画面最下部に固定 */
       .bottom-nav  { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; }
     }
 
@@ -355,9 +357,4 @@
   document.querySelectorAll('.nav-item').forEach(el => {
     el.addEventListener('click', () => {
       el.style.background = 'rgba(0,80,220,0.14)';
-      setTimeout(() => { el.style.background = ''; }, 180);
-    });
-  });
-</script>
-</body>
-</html>
+      setTimeout(() => { el
