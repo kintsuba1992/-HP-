@@ -72,6 +72,10 @@
       width: 100%;
       font-weight: 700;
       text-shadow:
+        -2px -2px 0 #3d1f00,
+         2px -2px 0 #3d1f00,
+        -2px  2px 0 #3d1f00,
+         2px  2px 0 #3d1f00,
         0 0 16px rgba(130, 80, 255, 0.75),
         0 2px 6px rgba(0, 0, 0, 0.85);
     }
@@ -106,6 +110,10 @@
       line-height: 1.75;
       color: #ffffffe6;
       text-shadow:
+        -2px -2px 0 #3d1f00,
+         2px -2px 0 #3d1f00,
+        -2px  2px 0 #3d1f00,
+         2px  2px 0 #3d1f00,
         0 0 10px rgba(50, 0, 160, 0.6),
         0 2px 8px rgba(0, 0, 0, 0.92);
     }
@@ -357,4 +365,9 @@
   document.querySelectorAll('.nav-item').forEach(el => {
     el.addEventListener('click', () => {
       el.style.background = 'rgba(0,80,220,0.14)';
-      setTimeout(() => { el
+      setTimeout(() => { el.style.background = ''; }, 180);
+    });
+  });
+</script>
+</body>
+</html>
