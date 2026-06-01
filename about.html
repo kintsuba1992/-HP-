@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>代表紹介 | にほん電脳横丁</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;700;800&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+    /* ══════════════════════════════════
+       VARIABLES & RESET
+    ══════════════════════════════════ */
+    :root {
+      --cyan:    #00ccff;
+      --blue:    #0055ff;
+      --violet:  #8800cc;
+      --gold:    #cc7700;
+      --bg:      #060010;
+      --text:    #ddd4ff;
+      --nav-h:   64px;
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { height:100%; }
+
+    body {
+      min-height: 100%;
+      background-image: url('./bg_wide.jpg');
+      background-size: cover;
+      background-position: center center;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      color: var(--text);
+      font-family: 'Noto Sans JP', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── 暗いオーバーレイ ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: rgba(3, 0, 18, 0.72);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ══════════════════════════════════
+       HAMBURGER MENU
+    ══════════════════════════════════ */
+    .menu-btn {
+      position: fixed;
+      top: 16px; right: 20px;
+      z-index: 200;
+      width: 44px; height: 44px;
+      background: rgba(3, 0, 18, 0.85);
+      border: 1px solid rgba(0, 150, 255, 0.4);
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 6px;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      box-shadow: 0 0 12px rgba(0, 100, 255, 0.3);
+    }
+    .menu-btn:hover {
+      border-color: var(--cyan);
+      box-shadow: 0 0 18px rgba(0, 200, 255, 0.5);
+    }
+    .menu-btn span {
+      display: block;
+      width: 22px; height: 2px;
+      background: var(--cyan);
+      border-radius: 2px;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 6px var(--cyan);
+    }
+    .menu-btn.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+    .menu-btn.open span:nth-child(2) { opacity: 0; }
+    .menu-btn.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+    /* ── ドロワー（上からスライド） ── */
+    .drawer {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 190;
+      background: rgba(3, 0, 18, 0.96);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 2px solid rgba(0, 150, 255, 0.3);
+      box-shadow: 0 8px 32px rgba(0, 0, 80, 0.6);
+      transform: translateY(-100%);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      padding: 70px 0 24px;
+    }
+    .drawer.open { transform: translateY(0); }
+
+    /* 上部グローライン */
+    .drawer::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg,
+        transparent, rgba(0,150,255,0.8), rgba(150,0,255,0.8), transparent);
+      box-shadow: 0 0 16px rgba(0,100,255,0.4);
+    }
+
+    .drawer-item {
+      display: block;
+      padding: 14px 32px;
+      text-decoration: none;
+      font-family: 'Shippori Mincho B1', serif;
+      font-size: 1.1rem;
+      letter-spacing: 0.15em;
+      color: rgba(185, 165, 255, 0.85);
+      border-bottom: 1px solid rgba(100, 50, 200, 0.2);
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .drawer-item::before {
+      content: '◈';
+      margin-right: 12px;
+      color: var(--cyan);
+      font-size: 0.8rem;
+      opacity: 0.7;
+    }
+    .drawer-item:hover {
+      color: #fff;
+      background: rgba(0, 80, 200, 0.12);
+      text-shadow: 0 0 10px var(--cyan);
+      padding-left: 40px;
+    }
+    .drawer-item.top {
+      color: rgba(200, 180, 255, 0.6);
+      font-size: 0.9rem;
+    }
+
+    /* ══════════════════════════════════
+       PAGE WRAPPER
+    ══════════════════════════════════ */
+    .page-wrapper {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      padding: 80px 5% 60px;
+    }
+
+    /* ══════════════════════════════════
+       PAGE TITLE
+    ══════════════════════════════════ */
+    .page-title {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+    .page-title h1 {
+      font-family: 'Shippori Mincho B1', serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 0.2em;
+      text-shadow:
+        0 0 10px rgba(0, 150, 255, 0.8),
+        0 0 30px rgba(100, 0, 255, 0.5);
+    }
+    .page-title-line {
+      width: 200px;
+      height: 1px;
+      margin: 16px auto 0;
+      background: linear-gradient(90deg,
+        transparent, rgba(0,160,255,0.7), rgba(160,0,255,0.7), transparent);
+      box-shadow: 0 0 10px rgba(0,120,255,0.3);
+    }
+
+    /* ══════════════════════════════════
+       CARDS GRID
+    ══════════════════════════════════ */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* ── 個人カード ── */
+    .profile-card {
+      background: rgba(5, 0, 25, 0.70);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(100, 60, 255, 0.25);
+      border-radius: 16px;
+      padding: 32px 28px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .profile-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg,
+        transparent, rgba(0,160,255,0.6), rgba(160,0,255,0.6), transparent);
+    }
+    .profile-card:hover {
+      border-color: rgba(0, 180, 255, 0.4);
+      box-shadow: 0 8px 40px rgba(0, 60, 200, 0.3);
+      transform: translateY(-4px);
+    }
+
+    /* ── 写真 ── */
+    .profile-photo {
+      width: 130px; height: 130px;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: top center;
+      border: 2px solid rgba(0, 180, 255, 0.5);
+      box-shadow:
+        0 0 16px rgba(0, 120, 255, 0.4),
+        0 0 40px rgba(100, 0, 255, 0.2);
+      display: block;
+      margin: 0 auto 20px;
+    }
+
+    /* ── 名前 ── */
+    .profile-name {
+      font-family: 'Shippori Mincho B1', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #fff;
+      text-align: center;
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
+      text-shadow:
+        -1px -1px 0 #cc7700,
+         1px -1px 0 #cc7700,
+        -1px  1px 0 #cc7700,
+         1px  1px 0 #cc7700,
+        0 0 12px rgba(0, 150, 255, 0.6);
+    }
+    .profile-name-sub {
+      font-size: 0.85rem;
+      color: rgba(150, 140, 200, 0.8);
+      text-align: center;
+      letter-spacing: 0.1em;
+      margin-bottom: 16px;
+    }
+
+    /* ── 区切り線 ── */
+    .profile-divider {
+      width: 80%;
+      height: 1px;
+      margin: 0 auto 16px;
+      background: linear-gradient(90deg,
+        transparent, rgba(0,140,255,0.5), transparent);
+    }
+
+    /* ── プロフィール文 ── */
+    .profile-bio {
+      font-size: 0.88rem;
+      line-height: 1.9;
+      color: rgba(210, 200, 240, 0.85);
+      margin-bottom: 20px;
+    }
+
+    /* ── SNSリンク ── */
+    .profile-sns {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      font-size: 0.82rem;
+      color: var(--cyan);
+      border: 1px solid rgba(0, 180, 255, 0.3);
+      border-radius: 20px;
+      padding: 5px 14px;
+      margin-bottom: 20px;
+      transition: all 0.2s ease;
+    }
+    .profile-sns:hover {
+      background: rgba(0, 150, 255, 0.12);
+      border-color: var(--cyan);
+      box-shadow: 0 0 10px rgba(0, 200, 255, 0.3);
+    }
+    .profile-sns::before { content: '𝕏'; font-size: 0.9rem; }
+
+    /* ── 活動リスト ── */
+    .profile-activities-title {
+      font-family: 'Shippori Mincho B1', serif;
+      font-size: 0.82rem;
+      color: rgba(150, 140, 200, 0.8);
+      letter-spacing: 0.12em;
+      margin-bottom: 10px;
+    }
+    .profile-activity {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .profile-activity::before {
+      content: '◈';
+      color: var(--cyan);
+      font-size: 0.7rem;
+      margin-top: 3px;
+      flex-shrink: 0;
+    }
+    .profile-activity a {
+      font-size: 0.82rem;
+      line-height: 1.6;
+      color: rgba(180, 165, 230, 0.85);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .profile-activity a:hover {
+      color: var(--cyan);
+      text-shadow: 0 0 8px rgba(0, 200, 255, 0.4);
+    }
+
+    /* ══════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════ */
+    @media (max-width: 768px) {
+      body {
+        background-image: url('./bg_portrait.jpg');
+        background-position: top center;
+      }
+      .page-wrapper { padding: 70px 4% 50px; }
+      .cards-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+      .page-title h1 { font-size: 1.6rem; }
+      .profile-photo { width: 110px; height: 110px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── ハンバーガーボタン ── -->
+<button class="menu-btn" id="menuBtn" aria-label="メニューを開く">
+  <span></span><span></span><span></span>
+</button>
+
+<!-- ── ドロワーメニュー ── -->
+<nav class="drawer" id="drawer">
+  <a class="drawer-item top" href="index.html">◀ TOPへ戻る</a>
+  <a class="drawer-item" href="about.html">代表紹介</a>
+  <a class="drawer-item" href="projects.html">参加プロジェクト</a>
+  <a class="drawer-item" href="events.html">イベント情報</a>
+  <a class="drawer-item" href="contact.html">問い合わせ</a>
+</nav>
+
+<!-- ── メインコンテンツ ── -->
+<div class="page-wrapper">
+
+  <div class="page-title">
+    <h1>代 表 紹 介</h1>
+    <div class="page-title-line"></div>
+  </div>
+
+  <div class="cards-grid">
+
+    <!-- ── 1人目：ゆんける ── -->
+    <div class="profile-card">
+      <img class="profile-photo" src="./img/yunkeru.jpg" alt="須藤優也（ゆんける）">
+      <p class="profile-name">須藤 優也</p>
+      <p class="profile-name-sub">ゆんける</p>
+      <div class="profile-divider"></div>
+      <p class="profile-bio">
+        才能や魅力を見つけ繋げて生み出すプロジェクトを軸に活動しているカードゲーム好き
+      </p>
+      <a class="profile-sns" href="https://x.com/yunnkerujidouka">@yunnkerujidouka</a>
+      <p class="profile-activities-title">その他の活動</p>
+      <div class="profile-activity">
+        <a href="https://webcastleworld.com/">WebCastleWorld　創設者</a>
+      </div>
+      <div class="profile-activity">
+        <a href="https://jwbga.org/">日本Web3ボードゲーム連合　共同創設者</a>
+      </div>
+      <div class="profile-activity">
+        <a href="https://bugaku.net/">武楽座　電脳戦略担当</a>
+      </div>
+    </div>
+
+    <!-- ── 2人目：KINTSUBA ── -->
+    <div class="profile-card">
+      <img class="profile-photo" src="./img/kintsuba.jpg" alt="KINTSUBA">
+      <p class="profile-name">KINTSUBA</p>
+      <p class="profile-name-sub">&nbsp;</p>
+      <div class="profile-divider"></div>
+      <p class="profile-bio">
+        2017年に$XRPの購入をきっかけに仮想通貨デビュー（現在も保有）。2024年4月にBitgetWallet公式ミームコインである"$MOEW"のエアドロやBGBホワイトリストに当選。それを機にテレグラムで非公式MOEWコミュニティを海外ホルダーとともに創設し、公式化後も無報酬で日本コミュニティのモデレーターとして現在も従事中。現在は都内で全く無関係の分野で会社員として働きながら、Web3を始めとした電脳世界を探求しています。
+      </p>
+      <a class="profile-sns" href="https://x.com/kintsuba1992">@kintsuba1992</a>
+      <p class="profile-activities-title">その他の活動</p>
+      <div class="profile-activity">
+        <a href="https://t.me/moewcommunty">BGW公式ミームトークン"$MOEW"公式TGコミュニティ　モデレーター</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const btn    = document.getElementById('menuBtn');
+  const drawer = document.getElementById('drawer');
+
+  btn.addEventListener('click', () => {
+    const isOpen = drawer.classList.toggle('open');
+    btn.classList.toggle('open', isOpen);
+    btn.setAttribute('aria-label', isOpen ? 'メニューを閉じる' : 'メニューを開く');
+  });
+
+  // ドロワー外クリックで閉じる
+  document.addEventListener('click', e => {
+    if (!drawer.contains(e.target) && !btn.contains(e.target)) {
+      drawer.classList.remove('open');
+      btn.classList.remove('open');
+    }
+  });
+</script>
+</body>
+</html>
