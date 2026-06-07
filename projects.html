@@ -389,12 +389,6 @@
      GASからデータ取得
   ══════════════════════════════════ */
   async function fetchProjects() {
-    if (GAS_URL === 'https://script.google.com/macros/s/AKfycbys_YB5UpKqlgSwPygCAd2_1Yix_Hf0Oj9H3e6B7HotP3Iwe8AfO2H6VGvKjg_hVYVq/exec') {
-      // デモモード
-      allProjects = DEMO_PROJECTS;
-      renderProjects(allProjects);
-      return;
-    }
     showLoading();
     try {
       const res  = await fetch(GAS_URL);
