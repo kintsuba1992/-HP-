@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>参加プロジェクト | にほん電脳横丁</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;700;800&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+    /* ══════════════════════════════════
+       VARIABLES & RESET
+    ══════════════════════════════════ */
+    :root {
+      --cyan:   #00ccff;
+      --blue:   #0055ff;
+      --violet: #8800cc;
+      --gold:   #cc7700;
+      --text:   #ddd4ff;
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { height:100%; }
+
+    body {
+      min-height: 100%;
+      background-image: url('./bg_wide.jpg');
+      background-size: cover;
+      background-position: center center;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      color: var(--text);
+      font-family: 'Noto Sans JP', sans-serif;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: rgba(3, 0, 18, 0.75);
+      z-index: 0; pointer-events: none;
+    }
+
+    /* ══════════════════════════════════
+       HAMBURGER MENU
+    ══════════════════════════════════ */
+    .menu-btn {
+      position: fixed; top: 16px; right: 20px;
+      z-index: 200; width: 44px; height: 44px;
+      background: rgba(3, 0, 18, 0.85);
+      border: 1px solid rgba(0, 150, 255, 0.4);
+      border-radius: 8px; cursor: pointer;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 6px;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      box-shadow: 0 0 12px rgba(0, 100, 255, 0.3);
+    }
+    .menu-btn:hover { border-color: var(--cyan); box-shadow: 0 0 18px rgba(0,200,255,0.5); }
+    .menu-btn span {
+      display: block; width: 22px; height: 2px;
+      background: var(--cyan); border-radius: 2px;
+      transition: all 0.3s ease; box-shadow: 0 0 6px var(--cyan);
+    }
+    .menu-btn.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+    .menu-btn.open span:nth-child(2) { opacity: 0; }
+    .menu-btn.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+    .drawer {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 190;
+      background: rgba(3, 0, 18, 0.96);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-bottom: 2px solid rgba(0, 150, 255, 0.3);
+      box-shadow: 0 8px 32px rgba(0, 0, 80, 0.6);
+      transform: translateY(-100%);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      padding: 70px 0 24px;
+    }
+    .drawer.open { transform: translateY(0); }
+    .drawer::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(0,150,255,0.8), rgba(150,0,255,0.8), transparent);
+    }
+    .drawer-item {
+      display: block; padding: 14px 32px;
+      text-decoration: none;
+      font-family: 'Shippori Mincho B1', serif;
+      font-size: 1.1rem; letter-spacing: 0.15em;
+      color: rgba(185, 165, 255, 0.85);
+      border-bottom: 1px solid rgba(100, 50, 200, 0.2);
+      transition: all 0.2s ease;
+    }
+    .drawer-item::before { content: '◈'; margin-right: 12px; color: var(--cyan); font-size: 0.8rem; opacity: 0.7; }
+    .drawer-item:hover { color: #fff; background: rgba(0,80,200,0.12); text-shadow: 0 0 10px var(--cyan); padding-left: 40px; }
+    .drawer-item.top { color: rgba(200, 180, 255, 0.6); font-size: 0.9rem; }
+
+    /* ══════════════════════════════════
+       PAGE WRAPPER
+    ══════════════════════════════════ */
+    .page-wrapper {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      padding: 80px 5% 60px;
+    }
+
+    /* ══════════════════════════════════
+       PAGE TITLE
+    ══════════════════════════════════ */
+    .page-title { text-align: center; margin-bottom: 40px; }
+    .page-title h1 {
+      font-family: 'Shippori Mincho B1', serif;
+      font-size: clamp(2rem, 4vw, 3rem); font-weight: 800;
+      color: #fff; letter-spacing: 0.2em;
+      text-shadow: 0 0 10px rgba(0,150,255,0.8), 0 0 30px rgba(100,0,255,0.5);
+    }
+    .page-title-line {
+      width: 200px; height: 1px; margin: 16px auto 0;
+      background: linear-gradient(90deg, transparent, rgba(0,160,255,0.7), rgba(160,0,255,0.7), transparent);
+    }
+
+    /* ══════════════════════════════════
+       FILTER SECTION
+    ══════════════════════════════════ */
+    .filter-section {
+      max-width: 1100px; margin: 0 auto 40px;
+      background: rgba(5, 0, 25, 0.65);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(100, 60, 255, 0.2);
+      border-radius: 14px; padding: 20px 24px;
+    }
+    .filter-label {
+      font-family: 'Shippori Mincho B1', serif;
+      font-size: 0.82rem; letter-spacing: 0.15em;
+      color: rgba(150, 140, 200, 0.8); margin-bottom: 12px;
+    }
+    .tag-buttons {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;
+    }
+    .tag-btn {
+      padding: 5px 14px; border-radius: 20px; cursor: pointer;
+      font-size: 0.78rem; letter-spacing: 0.08em;
+      border: 1px solid rgba(100, 80, 200, 0.35);
+      background: rgba(20, 0, 50, 0.5);
+      color: rgba(180, 165, 230, 0.8);
+      transition: all 0.2s ease;
+    }
+    .tag-btn:hover { border-color: var(--cyan); color: #fff; }
+    .tag-btn.active {
+      background: rgba(0, 100, 200, 0.35);
+      border-color: var(--cyan);
+      color: #fff;
+      box-shadow: 0 0 8px rgba(0, 180, 255, 0.4);
+    }
+    .filter-controls {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .mode-btn {
+      padding: 6px 18px; border-radius: 20px; cursor: pointer;
+      font-size: 0.78rem; letter-spacing: 0.08em;
+      background: rgba(80, 0, 150, 0.3);
+      border: 1px solid rgba(150, 80, 255, 0.4);
+      color: rgba(180, 160, 255, 0.9);
+      transition: all 0.2s ease;
+    }
+    .mode-btn:hover { background: rgba(80, 0, 150, 0.5); border-color: var(--violet); }
+    .mode-btn.and {
+      background: rgba(0, 80, 150, 0.3);
+      border-color: rgba(0, 150, 255, 0.4);
+    }
+    .reset-btn {
+      padding: 6px 18px; border-radius: 20px; cursor: pointer;
+      font-size: 0.78rem; letter-spacing: 0.08em;
+      background: rgba(80, 20, 0, 0.3);
+      border: 1px solid rgba(200, 100, 0, 0.35);
+      color: rgba(220, 160, 100, 0.85);
+      transition: all 0.2s ease;
+    }
+    .reset-btn:hover { background: rgba(120, 40, 0, 0.4); border-color: var(--gold); color: #fff; }
+    .filter-hint {
+      font-size: 0.72rem; color: rgba(140, 130, 180, 0.65); margin-left: 4px;
+    }
+
+    /* ── タグ色 ── */
+    .tag { display:inline-block; padding:3px 10px; border-radius:12px; font-size:0.72rem; letter-spacing:0.06em; margin:2px; }
+    .tag-web3              { background:rgba(0,160,200,0.2); border:1px solid rgba(0,160,200,0.4); color:#00ccff; }
+    .tag-nft               { background:rgba(180,120,0,0.2); border:1px solid rgba(180,120,0,0.4); color:#ffaa22; }
+    .tag-ai                { background:rgba(120,0,220,0.2); border:1px solid rgba(120,0,220,0.4); color:#cc66ff; }
+    .tag-vtuber            { background:rgba(200,0,100,0.2); border:1px solid rgba(200,0,100,0.4); color:#ff66bb; }
+    .tag-digitalart        { background:rgba(200,80,0,0.2);  border:1px solid rgba(200,80,0,0.4);  color:#ff8833; }
+    .tag-metaverse         { background:rgba(0,160,80,0.2);  border:1px solid rgba(0,160,80,0.4);  color:#33cc88; }
+    .tag-boardgame         { background:rgba(0,80,200,0.2);  border:1px solid rgba(0,80,200,0.4);  color:#4488ff; }
+    .tag-traditional       { background:rgba(160,0,0,0.2);   border:1px solid rgba(160,0,0,0.4);   color:#ff4444; }
+
+    /* ══════════════════════════════════
+       PROJECTS GRID
+    ══════════════════════════════════ */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* ── プロジェクトカード ── */
+    .project-card {
+      background: rgba(5, 0, 25, 0.70);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(100, 60, 255, 0.25);
+      border-radius: 16px; padding: 28px 22px;
+      display: flex; flex-direction: column;
+      transition: all 0.3s ease; position: relative; overflow: hidden;
+    }
+    .project-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(0,160,255,0.6), rgba(160,0,255,0.6), transparent);
+    }
+    .project-card:hover {
+      border-color: rgba(0,180,255,0.4);
+      box-shadow: 0 8px 40px rgba(0,60,200,0.3);
+      transform: translateY(-4px);
+    }
+    .project-logo {
+      width: 100px; height: 100px; border-radius: 50%;
+      object-fit: cover; display: block; margin: 0 auto 16px;
+      border: 2px solid rgba(0,180,255,0.4);
+      box-shadow: 0 0 16px rgba(0,120,255,0.3), 0 0 40px rgba(100,0,255,0.15);
+    }
+    .project-name {
+      font-family: 'Shippori Mincho B1', serif;
+      font-size: 1.15rem; font-weight: 700;
+      color: #fff; text-align: center; margin-bottom: 10px;
+      text-shadow:
+        -1px -1px 0 #cc7700, 1px -1px 0 #cc7700,
+        -1px 1px 0 #cc7700, 1px 1px 0 #cc7700,
+        0 0 10px rgba(0,150,255,0.5);
+    }
+    .project-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin-bottom: 14px; }
+    .project-divider {
+      width: 80%; height: 1px; margin: 0 auto 14px;
+      background: linear-gradient(90deg, transparent, rgba(0,140,255,0.4), transparent);
+    }
+    .project-desc {
+      font-size: 0.82rem; line-height: 1.85;
+      color: rgba(200, 190, 235, 0.82);
+      flex: 1; margin-bottom: 18px;
+    }
+    .project-links {
+      display: flex; flex-wrap: wrap; gap: 7px; margin-top: auto;
+    }
+    .link-btn {
+      padding: 5px 12px; border-radius: 16px; font-size: 0.75rem;
+      text-decoration: none; letter-spacing: 0.06em;
+      transition: all 0.2s ease; border: 1px solid;
+    }
+    .link-btn.website  { border-color:rgba(0,180,255,0.4); color:var(--cyan); }
+    .link-btn.x        { border-color:rgba(200,200,200,0.3); color:rgba(220,215,255,0.8); }
+    .link-btn.discord  { border-color:rgba(88,101,242,0.4); color:#7289da; }
+    .link-btn.telegram { border-color:rgba(0,136,204,0.4); color:#29b6f6; }
+    .link-btn.instagram{ border-color:rgba(225,48,108,0.4); color:#f06292; }
+    .link-btn:hover { background:rgba(255,255,255,0.06); transform:translateY(-1px); }
+
+    /* ── ローディング / エラー / 空 ── */
+    .state-msg {
+      grid-column: 1 / -1; text-align: center;
+      padding: 60px 20px;
+      font-family: 'Shippori Mincho B1', serif;
+      font-size: 1rem; letter-spacing: 0.1em;
+      color: rgba(160, 150, 210, 0.7);
+    }
+    .loading-spinner {
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 2px solid rgba(0, 150, 255, 0.2);
+      border-top-color: var(--cyan);
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ══════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════ */
+    @media (max-width: 1024px) {
+      .projects-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      body { background-image: url('./bg_portrait.jpg'); background-position: top center; }
+      .page-wrapper { padding: 70px 4% 50px; }
+      .projects-grid { grid-template-columns: 1fr; }
+      .page-title h1 { font-size: 1.6rem; }
+      .filter-section { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── ハンバーガーボタン ── -->
+<button class="menu-btn" id="menuBtn" aria-label="メニューを開く">
+  <span></span><span></span><span></span>
+</button>
+
+<!-- ── ドロワーメニュー ── -->
+<nav class="drawer" id="drawer">
+  <a class="drawer-item top" href="index.html">◀ TOPへ戻る</a>
+  <a class="drawer-item" href="about.html">代表紹介</a>
+  <a class="drawer-item" href="projects.html">参加プロジェクト</a>
+  <a class="drawer-item" href="events.html">イベント情報</a>
+  <a class="drawer-item" href="contact.html">問い合わせ</a>
+</nav>
+
+<div class="page-wrapper">
+
+  <div class="page-title">
+    <h1>推 し プ ロ ジ ェ ク ト</h1>
+    <div class="page-title-line"></div>
+  </div>
+
+  <!-- ── フィルター ── -->
+  <div class="filter-section">
+    <p class="filter-label">▸ カテゴリで絞り込む</p>
+    <div class="tag-buttons" id="tagButtons"></div>
+    <div class="filter-controls">
+      <button class="mode-btn" id="modeBtn" onclick="toggleMode()">いずれかを含む（OR）</button>
+      <button class="reset-btn" onclick="resetFilter()">リセット</button>
+      <span class="filter-hint" id="filterHint"></span>
+    </div>
+  </div>
+
+  <!-- ── プロジェクト一覧 ── -->
+  <div class="projects-grid" id="projectsGrid">
+    <div class="state-msg">
+      <div class="loading-spinner"></div>
+      読み込み中...
+    </div>
+  </div>
+
+</div>
+
+<script>
+  /* ══════════════════════════════════
+     設定
+  ══════════════════════════════════ */
+  // ▼ GASデプロイ後にURLを書き換えてください
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbys_YB5UpKqlgSwPygCAd2_1Yix_Hf0Oj9H3e6B7HotP3Iwe8AfO2H6VGvKjg_hVYVq/exec';
+
+  // タグ定義（表示順・色クラス）
+  const TAG_DEFS = [
+    { label: 'Web3',            cls: 'web3'       },
+    { label: 'NFT',             cls: 'nft'        },
+    { label: 'AI',              cls: 'ai'         },
+    { label: 'VTuber',          cls: 'vtuber'     },
+    { label: 'デジタルアート',  cls: 'digitalart' },
+    { label: 'メタバース',      cls: 'metaverse'  },
+    { label: 'ボードゲーム',    cls: 'boardgame'  },
+    { label: '伝統文化×テクノロジー', cls: 'traditional' },
+  ];
+
+  // デモデータ（GAS未設定時のフォールバック）
+  const DEMO_PROJECTS = [
+    {
+      id: 1,
+      name: 'Minara',
+      description: 'Minaraは、トレードアイデアを「検証できる戦略」へ変える、デジタル金融向けAIトレーディングプラットフォームです。市場分析、戦略作成、バックテスト、最適化、そして運用まで。自然言語でアイデアを入力するだけで、AIがその考えを戦略ロジックとして整理し、過去データをもとにパフォーマンスを検証します。Strategy Studioでは、総リターン、最大ドローダウン、勝率などの指標を確認しながら、戦略の改善や自動最適化、ライブ運用まで一貫して行うことができます。',
+      tags: ['AI', 'Web3'],
+      website_url: 'https://copilot.minara.ai',
+      x_url: 'https://x.com/MinaraJapan',
+      discord_url: 'https://discord.com/invite/minaraai',
+      telegram_url: '',
+      instagram_url: '',
+      logo_filename: 'minara_avatar.png'
+    }
+  ];
+
+  /* ══════════════════════════════════
+     状態
+  ══════════════════════════════════ */
+  let allProjects  = [];
+  let selectedTags = [];
+  let filterMode   = 'OR'; // 'OR' | 'AND'
+
+  /* ══════════════════════════════════
+     初期化
+  ══════════════════════════════════ */
+  window.addEventListener('DOMContentLoaded', () => {
+    renderTagButtons();
+    fetchProjects();
+  });
+
+  /* ══════════════════════════════════
+     GASからデータ取得
+  ══════════════════════════════════ */
+  async function fetchProjects() {
+    if (GAS_URL === 'YOUR_GAS_ENDPOINT') {
+      // デモモード
+      allProjects = DEMO_PROJECTS;
+      renderProjects(allProjects);
+      return;
+    }
+    showLoading();
+    try {
+      const res  = await fetch(GAS_URL);
+      const data = await res.json();
+      if (data.status === 'ok') {
+        allProjects = data.projects;
+        renderProjects(allProjects);
+      } else {
+        showError('データの取得に失敗しました');
+      }
+    } catch (e) {
+      showError('通信エラーが発生しました');
+    }
+  }
+
+  /* ══════════════════════════════════
+     フィルター
+  ══════════════════════════════════ */
+  function filterProjects() {
+    if (selectedTags.length === 0) return allProjects;
+    return allProjects.filter(p => {
+      if (filterMode === 'OR') {
+        return selectedTags.some(t => p.tags.includes(t));
+      } else {
+        return selectedTags.every(t => p.tags.includes(t));
+      }
+    });
+  }
+
+  function toggleTag(tag) {
+    const idx = selectedTags.indexOf(tag);
+    if (idx === -1) selectedTags.push(tag);
+    else            selectedTags.splice(idx, 1);
+    updateTagButtons();
+    updateHint();
+    renderProjects(filterProjects());
+  }
+
+  function toggleMode() {
+    filterMode = filterMode === 'OR' ? 'AND' : 'OR';
+    const btn  = document.getElementById('modeBtn');
+    btn.textContent = filterMode === 'OR'
+      ? 'いずれかを含む（OR）'
+      : 'すべてを含む（AND）';
+    btn.classList.toggle('and', filterMode === 'AND');
+    updateHint();
+    renderProjects(filterProjects());
+  }
+
+  function resetFilter() {
+    selectedTags = [];
+    filterMode   = 'OR';
+    document.getElementById('modeBtn').textContent = 'いずれかを含む（OR）';
+    document.getElementById('modeBtn').classList.remove('and');
+    updateTagButtons();
+    updateHint();
+    renderProjects(allProjects);
+  }
+
+  function updateHint() {
+    const hint = document.getElementById('filterHint');
+    if (selectedTags.length === 0) {
+      hint.textContent = '';
+    } else {
+      const mode = filterMode === 'OR' ? 'いずれか' : 'すべて';
+      hint.textContent = `「${selectedTags.join('・')}」を${mode}含むプロジェクトを表示中`;
+    }
+  }
+
+  /* ══════════════════════════════════
+     タグボタン描画
+  ══════════════════════════════════ */
+  function renderTagButtons() {
+    const wrap = document.getElementById('tagButtons');
+    wrap.innerHTML = TAG_DEFS.map(t => `
+      <button class="tag-btn ${selectedTags.includes(t.label) ? 'active' : ''}"
+              onclick="toggleTag('${t.label}')">
+        ${t.label}
+      </button>
+    `).join('');
+  }
+
+  function updateTagButtons() {
+    document.querySelectorAll('.tag-btn').forEach((btn, i) => {
+      btn.classList.toggle('active', selectedTags.includes(TAG_DEFS[i].label));
+    });
+  }
+
+  /* ══════════════════════════════════
+     プロジェクト一覧描画
+  ══════════════════════════════════ */
+  function renderProjects(projects) {
+    const grid = document.getElementById('projectsGrid');
+    if (projects.length === 0) {
+      grid.innerHTML = `<div class="state-msg">該当するプロジェクトはありません</div>`;
+      return;
+    }
+    grid.innerHTML = projects.map(createCard).join('');
+  }
+
+  function createCard(p) {
+    const tagHtml = p.tags.map(t => {
+      const def = TAG_DEFS.find(d => d.label === t);
+      const cls  = def ? def.cls : 'web3';
+      return `<span class="tag tag-${cls}">${t}</span>`;
+    }).join('');
+
+    const links = [
+      p.website_url   ? `<a class="link-btn website"   href="${p.website_url}">Website</a>`  : '',
+      p.x_url         ? `<a class="link-btn x"          href="${p.x_url}">𝕏</a>`             : '',
+      p.discord_url   ? `<a class="link-btn discord"    href="${p.discord_url}">Discord</a>`  : '',
+      p.telegram_url  ? `<a class="link-btn telegram"   href="${p.telegram_url}">Telegram</a>` : '',
+      p.instagram_url ? `<a class="link-btn instagram"  href="${p.instagram_url}">Instagram</a>` : '',
+    ].filter(Boolean).join('');
+
+    const logo = p.logo_filename
+      ? `<img class="project-logo" src="./img/${p.logo_filename}" alt="${p.name}">`
+      : `<div class="project-logo" style="background:rgba(0,80,180,0.3);display:flex;align-items:center;justify-content:center;font-size:2rem;">🌐</div>`;
+
+    return `
+      <div class="project-card">
+        ${logo}
+        <h3 class="project-name">${p.name}</h3>
+        <div class="project-tags">${tagHtml}</div>
+        <div class="project-divider"></div>
+        <p class="project-desc">${p.description}</p>
+        <div class="project-links">${links}</div>
+      </div>`;
+  }
+
+  /* ══════════════════════════════════
+     状態表示
+  ══════════════════════════════════ */
+  function showLoading() {
+    document.getElementById('projectsGrid').innerHTML = `
+      <div class="state-msg">
+        <div class="loading-spinner"></div>
+        読み込み中...
+      </div>`;
+  }
+
+  function showError(msg) {
+    document.getElementById('projectsGrid').innerHTML = `
+      <div class="state-msg">⚠ ${msg}<br><small style="font-size:0.75rem;opacity:0.6;margin-top:8px;display:block;">
+        しばらく経ってから再読み込みしてください</small>
+      </div>`;
+  }
+
+  /* ══════════════════════════════════
+     ハンバーガーメニュー
+  ══════════════════════════════════ */
+  const btn    = document.getElementById('menuBtn');
+  const drawer = document.getElementById('drawer');
+  btn.addEventListener('click', () => {
+    const isOpen = drawer.classList.toggle('open');
+    btn.classList.toggle('open', isOpen);
+    btn.setAttribute('aria-label', isOpen ? 'メニューを閉じる' : 'メニューを開く');
+  });
+  document.addEventListener('click', e => {
+    if (!drawer.contains(e.target) && !btn.contains(e.target)) {
+      drawer.classList.remove('open');
+      btn.classList.remove('open');
+    }
+  });
+</script>
+</body>
+</html>
