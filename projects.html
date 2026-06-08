@@ -489,32 +489,53 @@
     grid.innerHTML = projects.map(createCard).join('');
   }
 
+  /* ══════════════════════════════════
+     セキュリティ：サニタイズ関数
+  ══════════════════════════════════ */
+  function escapeHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function safeUrl(url) {
+    if (!url) return '';
+    return /^https?:\/\//i.test(url.trim()) ? url.trim() : '';
+  }
+
   function createCard(p) {
     const tagHtml = p.tags.map(t => {
       const def = TAG_DEFS.find(d => d.label === t);
       const cls  = def ? def.cls : 'web3';
-      return `<span class="tag tag-${cls}">${t}</span>`;
+      return `<span class="tag tag-${cls}">${escapeHtml(t)}</span>`;
     }).join('');
 
     const links = [
-      p.website_url   ? `<a class="link-btn website"   href="${p.website_url}">Website</a>`  : '',
-      p.x_url         ? `<a class="link-btn x"          href="${p.x_url}">𝕏</a>`             : '',
-      p.discord_url   ? `<a class="link-btn discord"    href="${p.discord_url}">Discord</a>`  : '',
-      p.telegram_url  ? `<a class="link-btn telegram"   href="${p.telegram_url}">Telegram</a>` : '',
-      p.instagram_url ? `<a class="link-btn instagram"  href="${p.instagram_url}">Instagram</a>` : '',
+      safeUrl(p.website_url)   ? `<a class="link-btn website"   href="${safeUrl(p.website_url)}">Website</a>`   : '',
+      safeUrl(p.x_url)         ? `<a class="link-btn x"         href="${safeUrl(p.x_url)}">𝕏</a>`              : '',
+      safeUrl(p.discord_url)   ? `<a class="link-btn discord"   href="${safeUrl(p.discord_url)}">Discord</a>`   : '',
+      safeUrl(p.telegram_url)  ? `<a class="link-btn telegram"  href="${safeUrl(p.telegram_url)}">Telegram</a>` : '',
+      safeUrl(p.instagram_url) ? `<a class="link-btn instagram" href="${safeUrl(p.instagram_url)}">Instagram</a>` : '',
     ].filter(Boolean).join('');
 
-    const logo = p.logo_filename
-      ? `<img class="project-logo" src="./img/${p.logo_filename}" alt="${p.name}">`
+    const safeName     = escapeHtml(p.name);
+    const safeDesc     = escapeHtml(p.description);
+    const safeFilename = escapeHtml(p.logo_filename);
+
+    const logo = safeFilename
+      ? `<img class="project-logo" src="./img/${safeFilename}" alt="${safeName}">`
       : `<div class="project-logo" style="background:rgba(0,80,180,0.3);display:flex;align-items:center;justify-content:center;font-size:2rem;">🌐</div>`;
 
     return `
       <div class="project-card">
         ${logo}
-        <h3 class="project-name">${p.name}</h3>
+        <h3 class="project-name">${safeName}</h3>
         <div class="project-tags">${tagHtml}</div>
         <div class="project-divider"></div>
-        <p class="project-desc">${p.description}</p>
+        <p class="project-desc">${safeDesc}</p>
         <div class="project-links">${links}</div>
       </div>`;
   }
