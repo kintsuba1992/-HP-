@@ -129,10 +129,10 @@
        JOIN BUTTON
     ══════════════════════════════════ */
     .join-btn {
-      position: absolute;
-      right: 3%;
-      bottom: calc(var(--nav-h) + 4vh);
-      z-index: 15;
+      position: fixed;
+      top: 18px;
+      right: 20px;
+      z-index: 100;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -255,7 +255,8 @@
       .nav-sep     { margin: 22px 0; }
       /* fixed: ブラウザ・アプリ内ブラウザ問わず常に画面最下部に固定 */
       .bottom-nav  { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; }
-      .join-btn    { display: none; }
+      /* 参加ボタン：モバイルは小さく右上表示 */
+      .join-btn    { font-size: 0.7rem; padding: 7px 14px; top: 14px; right: 14px; letter-spacing: 0.08em; }
     }
 
     @media (max-width: 420px) {
