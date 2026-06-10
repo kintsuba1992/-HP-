@@ -321,10 +321,21 @@
     <div class="page-title-line"></div>
   </div>
 
+  <!-- ── 隠しiframe（Google Forms送信受け取り用） ── -->
+  <iframe id="hiddenFrame" name="hiddenFrame" style="display:none;" title="form-target"></iframe>
+
   <div class="form-card">
 
     <!-- ── お問い合わせフォーム ── -->
-    <form id="contactForm">
+    <form id="contactForm"
+          action="https://docs.google.com/forms/d/e/1FAIpQLScm1PJ77lWkO8Qw86BIRROkm4n3CVpBaxoexHZA1NJCc3V7-g/formResponse"
+          method="POST"
+          target="hiddenFrame">
+      <!-- Google Forms 送信用 hidden inputs -->
+      <input type="hidden" id="h_name"    name="entry.364223754">
+      <input type="hidden" id="h_email"   name="entry.555149849">
+      <input type="hidden" id="h_subject" name="entry.1327937472">
+      <input type="hidden" id="h_message" name="entry.328830998">
 
       <div class="form-group">
         <label class="form-label" for="inputName">
@@ -369,7 +380,7 @@
           placeholder="お問い合わせ内容をご記入ください" required></textarea>
       </div>
 
-      <button class="submit-btn" type="submit" id="submitBtn">
+      <button class="submit-btn" type="button" id="submitBtn" onclick="submitForm()">
         送 信 す る
       </button>
 
@@ -407,42 +418,44 @@
 
 <script>
   /* ══════════════════════════════════
-     Google Forms 送信先
+     hidden iframe 送信方式
   ══════════════════════════════════ */
-  const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScm1PJ77lWkO8Qw86BIRROkm4n3CVpBaxoexHZA1NJCc3V7-g/formResponse';
+  let formSubmitted = false;
 
-  const ENTRY = {
-    name:    'entry.364223754',
-    email:   'entry.555149849',
-    subject: 'entry.1327937472',
-    message: 'entry.328830998',
-  };
+  // iframeのonload：送信後のGoogleレスポンスを検知
+  document.getElementById('hiddenFrame').addEventListener('load', () => {
+    if (formSubmitted) {
+      showResult('success');
+    }
+  });
 
-  /* ══════════════════════════════════
-     フォーム送信処理
-  ══════════════════════════════════ */
-  document.getElementById('contactForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
+  function submitForm() {
+    // バリデーション
+    const name    = document.getElementById('inputName').value.trim();
+    const email   = document.getElementById('inputEmail').value.trim();
+    const subject = document.getElementById('inputSubject').value;
+    const message = document.getElementById('inputMessage').value.trim();
 
+    if (!name || !email || !subject || !message) {
+      alert('すべての項目を入力してください。');
+      return;
+    }
+
+    // hidden inputs に値をセット
+    document.getElementById('h_name').value    = name;
+    document.getElementById('h_email').value   = email;
+    document.getElementById('h_subject').value = subject;
+    document.getElementById('h_message').value = message;
+
+    // スピナー表示・ボタン無効化
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
     btn.innerHTML = '<span class="sending-spinner"></span>送信中...';
 
-    const params = new URLSearchParams();
-    params.append(ENTRY.name,    document.getElementById('inputName').value.trim());
-    params.append(ENTRY.email,   document.getElementById('inputEmail').value.trim());
-    params.append(ENTRY.subject, document.getElementById('inputSubject').value);
-    params.append(ENTRY.message, document.getElementById('inputMessage').value.trim());
-
-    try {
-      await fetch(FORM_URL, { method: 'POST', mode: 'no-cors', body: params });
-      showResult('success');
-    } catch (err) {
-      showResult('error');
-      btn.disabled = false;
-      btn.textContent = '送 信 す る';
-    }
-  });
+    // hidden iframe に向けてフォーム送信
+    formSubmitted = true;
+    document.getElementById('contactForm').submit();
+  }
 
   function showResult(type) {
     document.getElementById('contactForm').style.display = 'none';
@@ -456,26 +469,28 @@
   function resetForm() {
     document.getElementById('contactForm').style.display = 'block';
     document.getElementById('errorMsg').classList.remove('visible');
-    document.getElementById('submitBtn').disabled = false;
-    document.getElementById('submitBtn').textContent = '送 信 す る';
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = false;
+    btn.textContent = '送 信 す る';
+    formSubmitted = false;
   }
 
   /* ══════════════════════════════════
      ハンバーガーメニュー
   ══════════════════════════════════ */
-  const btn    = document.getElementById('menuBtn');
-  const drawer = document.getElementById('drawer');
+  const menuBtn = document.getElementById('menuBtn');
+  const drawer  = document.getElementById('drawer');
 
-  btn.addEventListener('click', () => {
+  menuBtn.addEventListener('click', () => {
     const isOpen = drawer.classList.toggle('open');
-    btn.classList.toggle('open', isOpen);
-    btn.setAttribute('aria-label', isOpen ? 'メニューを閉じる' : 'メニューを開く');
+    menuBtn.classList.toggle('open', isOpen);
+    menuBtn.setAttribute('aria-label', isOpen ? 'メニューを閉じる' : 'メニューを開く');
   });
 
   document.addEventListener('click', e => {
-    if (!drawer.contains(e.target) && !btn.contains(e.target)) {
+    if (!drawer.contains(e.target) && !menuBtn.contains(e.target)) {
       drawer.classList.remove('open');
-      btn.classList.remove('open');
+      menuBtn.classList.remove('open');
     }
   });
 </script>
