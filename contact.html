@@ -428,14 +428,14 @@
     btn.disabled = true;
     btn.innerHTML = '<span class="sending-spinner"></span>送信中...';
 
-    const body = new FormData();
-    body.append(ENTRY.name,    document.getElementById('inputName').value.trim());
-    body.append(ENTRY.email,   document.getElementById('inputEmail').value.trim());
-    body.append(ENTRY.subject, document.getElementById('inputSubject').value);
-    body.append(ENTRY.message, document.getElementById('inputMessage').value.trim());
+    const params = new URLSearchParams();
+    params.append(ENTRY.name,    document.getElementById('inputName').value.trim());
+    params.append(ENTRY.email,   document.getElementById('inputEmail').value.trim());
+    params.append(ENTRY.subject, document.getElementById('inputSubject').value);
+    params.append(ENTRY.message, document.getElementById('inputMessage').value.trim());
 
     try {
-      await fetch(FORM_URL, { method: 'POST', mode: 'no-cors', body });
+      await fetch(FORM_URL, { method: 'POST', mode: 'no-cors', body: params });
       showResult('success');
     } catch (err) {
       showResult('error');
