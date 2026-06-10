@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>問い合わせ | にほん電脳横丁</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;700;800&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+    /* ══════════════════════════════════
+       VARIABLES & RESET
+    ══════════════════════════════════ */
+    :root {
+      --cyan:   #00ccff;
+      --blue:   #0055ff;
+      --violet: #8800cc;
+      --gold:   #cc7700;
+      --text:   #ddd4ff;
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { height:100%; }
+
+    body {
+      min-height: 100%;
+      background-image: url('./bg_wide.jpg');
+      background-size: cover;
+      background-position: center center;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      color: var(--text);
+      font-family: 'Noto Sans JP', sans-serif;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: rgba(3, 0, 18, 0.78);
+      z-index: 0; pointer-events: none;
+    }
+
+    /* ══════════════════════════════════
+       HAMBURGER MENU
+    ══════════════════════════════════ */
+    .menu-btn {
+      position: fixed; top: 16px; right: 20px;
+      z-index: 200; width: 44px; height: 44px;
+      background: rgba(3, 0, 18, 0.85);
+      border: 1px solid rgba(0, 150, 255, 0.4);
+      border-radius: 8px; cursor: pointer;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 6px;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      box-shadow: 0 0 12px rgba(0, 100, 255, 0.3);
+    }
+    .menu-btn:hover { border-color: var(--cyan); box-shadow: 0 0 18px rgba(0,200,255,0.5); }
+    .menu-btn span {
+      display: block; width: 22px; height: 2px;
+      background: var(--cyan); border-radius: 2px;
+      transition: all 0.3s ease; box-shadow: 0 0 6px var(--cyan);
+    }
+    .menu-btn.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+    .menu-btn.open span:nth-child(2) { opacity: 0; }
+    .menu-btn.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+    .drawer {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 190;
+      background: rgba(3, 0, 18, 0.96);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-bottom: 2px solid rgba(0, 150, 255, 0.3);
+      box-shadow: 0 8px 32px rgba(0, 0, 80, 0.6);
+      transform: translateY(-100%);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      padding: 70px 0 24px;
+    }
+    .drawer.open { transform: translateY(0); }
+    .drawer::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(0,150,255,0.8), rgba(150,0,255,0.8), transparent);
+    }
+    .drawer-item {
+      display: block; padding: 14px 32px;
+      text-decoration: none;
+      font-family: 'Shippori Mincho B1', serif;
+      font-size: 1.1rem; letter-spacing: 0.15em;
+      color: rgba(185, 165, 255, 0.85);
+      border-bottom: 1px solid rgba(100, 50, 200, 0.2);
+      transition: all 0.2s ease;
+    }
+    .drawer-item::before { content: '◈'; margin-right: 12px; color: var(--cyan); font-size: 0.8rem; opacity: 0.7; }
+    .drawer-item:hover { color: #fff; background: rgba(0,80,200,0.12); text-shadow: 0 0 10px var(--cyan); padding-left: 40px; }
+    .drawer-item.top { color: rgba(200, 180, 255, 0.6); font-size: 0.9rem; }
+
+    /* ══════════════════════════════════
+       PAGE WRAPPER
+    ══════════════════════════════════ */
+    .page-wrapper {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      padding: 80px 5% 60px;
+      display: flex; flex-direction: column;
+      align-items: center;
+    }
+
+    /* ══════════════════════════════════
+       PAGE TITLE
+    ══════════════════════════════════ */
+    .page-title { text-align: center; margin-bottom: 40px; width: 100%; }
+    .page-title h1 {
+      font-family: 'Shippori Mincho B1', serif;
+      font-size: clamp(2rem, 4vw, 3rem); font-weight: 800;
+      color: #fff; letter-spacing: 0.2em;
+      text-shadow: 0 0 10px rgba(0,150,255,0.8), 0 0 30px rgba(100,0,255,0.5);
+    }
+    .page-title-line {
+      width: 200px; height: 1px; margin: 16px auto 0;
+      background: linear-gradient(90deg, transparent, rgba(0,160,255,0.7), rgba(160,0,255,0.7), transparent);
+    }
+
+    /* ══════════════════════════════════
+       FORM CARD
+    ══════════════════════════════════ */
+    .form-card {
+      width: 100%;
+      max-width: 680px;
+      background: rgba(5, 0, 25, 0.72);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(100, 60, 255, 0.25);
+      border-radius: 18px;
+      padding: 40px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+    .form-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(0,160,255,0.6), rgba(160,0,255,0.6), transparent);
+    }
+
+    /* ── フォームグループ ── */
+    .form-group { margin-bottom: 24px; }
+
+    .form-label {
+      display: block;
+      font-family: 'Shippori Mincho B1', serif;
+      font-size: 0.88rem;
+      letter-spacing: 0.12em;
+      color: rgba(190, 175, 255, 0.85);
+      margin-bottom: 8px;
+    }
+    .form-label .required {
+      color: rgba(255, 100, 100, 0.8);
+      margin-left: 4px;
+      font-size: 0.75rem;
+    }
+
+    /* ── 共通インプットスタイル ── */
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      background: rgba(0, 0, 30, 0.55);
+      border: 1px solid rgba(100, 80, 200, 0.35);
+      border-radius: 8px;
+      padding: 12px 16px;
+      color: rgba(220, 210, 255, 0.92);
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      outline: none;
+      backdrop-filter: blur(4px);
+    }
+    .form-input::placeholder,
+    .form-textarea::placeholder {
+      color: rgba(150, 140, 200, 0.45);
+    }
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      border-color: rgba(0, 180, 255, 0.7);
+      background: rgba(0, 10, 40, 0.65);
+      box-shadow: 0 0 14px rgba(0, 120, 255, 0.25), inset 0 0 10px rgba(0, 80, 200, 0.1);
+    }
+
+    /* ── セレクトボックス ── */
+    .form-select {
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2300ccff' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 40px;
+      cursor: pointer;
+    }
+    .form-select option {
+      background: #0a0020;
+      color: rgba(220, 210, 255, 0.92);
+    }
+
+    /* ── テキストエリア ── */
+    .form-textarea {
+      min-height: 130px;
+      resize: vertical;
+      line-height: 1.7;
+    }
+
+    /* ── 送信ボタン ── */
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      margin-top: 8px;
+      font-family: 'Shippori Mincho B1', serif;
+      font-size: 1rem;
+      letter-spacing: 0.2em;
+      color: #fff;
+      background: rgba(0, 50, 180, 0.3);
+      border: 1px solid rgba(0, 180, 255, 0.55);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-shadow: 0 0 10px rgba(0, 200, 255, 0.7);
+      box-shadow: 0 0 16px rgba(0, 100, 255, 0.2);
+      backdrop-filter: blur(8px);
+    }
+    .submit-btn:hover {
+      background: rgba(0, 80, 220, 0.4);
+      border-color: rgba(0, 220, 255, 0.8);
+      box-shadow: 0 0 28px rgba(0, 150, 255, 0.45);
+      transform: translateY(-1px);
+    }
+    .submit-btn:active { transform: translateY(0); }
+    .submit-btn:disabled {
+      opacity: 0.5; cursor: not-allowed; transform: none;
+    }
+
+    /* ── 完了・エラーメッセージ ── */
+    .result-msg {
+      display: none;
+      text-align: center;
+      padding: 32px 16px;
+    }
+    .result-msg.visible { display: block; }
+    .result-icon { font-size: 3rem; margin-bottom: 16px; }
+    .result-title {
+      font-family: 'Shippori Mincho B1', serif;
+      font-size: 1.3rem; letter-spacing: 0.15em;
+      color: #fff; margin-bottom: 12px;
+      text-shadow: 0 0 12px rgba(0, 200, 255, 0.6);
+    }
+    .result-body {
+      font-size: 0.88rem; line-height: 1.9;
+      color: rgba(190, 180, 240, 0.8);
+    }
+    .result-back {
+      display: inline-block; margin-top: 24px;
+      padding: 10px 28px; border-radius: 20px;
+      text-decoration: none; font-size: 0.85rem;
+      letter-spacing: 0.1em; color: var(--cyan);
+      border: 1px solid rgba(0, 180, 255, 0.4);
+      transition: all 0.2s ease;
+    }
+    .result-back:hover { background: rgba(0,150,255,0.1); }
+
+    /* ── 送信中スピナー ── */
+    .sending-spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── 注意書き ── */
+    .form-notice {
+      font-size: 0.75rem;
+      color: rgba(140, 130, 180, 0.65);
+      text-align: center;
+      margin-top: 16px;
+      line-height: 1.7;
+    }
+
+    /* ══════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════ */
+    @media (max-width: 768px) {
+      body {
+        background-image: url('./bg_portrait.jpg');
+        background-position: top center;
+      }
+      .page-wrapper { padding: 70px 4% 50px; }
+      .form-card { padding: 28px 22px; }
+      .page-title h1 { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── ハンバーガーボタン ── -->
+<button class="menu-btn" id="menuBtn" aria-label="メニューを開く">
+  <span></span><span></span><span></span>
+</button>
+
+<!-- ── ドロワーメニュー ── -->
+<nav class="drawer" id="drawer">
+  <a class="drawer-item top" href="index.html">◀ TOPへ戻る</a>
+  <a class="drawer-item" href="about.html">代表紹介</a>
+  <a class="drawer-item" href="projects.html">横丁推しプロジェクト</a>
+  <a class="drawer-item" href="events.html">イベント情報</a>
+  <a class="drawer-item" href="contact.html">問い合わせ</a>
+</nav>
+
+<div class="page-wrapper">
+
+  <div class="page-title">
+    <h1>問 い 合 わ せ</h1>
+    <div class="page-title-line"></div>
+  </div>
+
+  <div class="form-card">
+
+    <!-- ── お問い合わせフォーム ── -->
+    <form id="contactForm">
+
+      <div class="form-group">
+        <label class="form-label" for="inputName">
+          お名前 <span class="required">※必須</span>
+        </label>
+        <input
+          class="form-input" id="inputName" type="text"
+          placeholder="山田 太郎" required autocomplete="name">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="inputEmail">
+          メールアドレス <span class="required">※必須</span>
+        </label>
+        <input
+          class="form-input" id="inputEmail" type="email"
+          placeholder="example@email.com" required autocomplete="email">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="inputSubject">
+          件名 <span class="required">※必須</span>
+        </label>
+        <select class="form-select" id="inputSubject" required>
+          <option value="" disabled selected>選択してください</option>
+          <option value="プロジェクトとしての参加に関して">プロジェクトとしての参加に関して</option>
+          <option value="イベントに関して">イベントに関して</option>
+          <option value="スポンサーに関して">スポンサーに関して</option>
+          <option value="提携に関して">提携に関して</option>
+          <option value="運営に関して">運営に関して</option>
+          <option value="海外に関して">海外に関して</option>
+          <option value="その他お問い合わせ">その他お問い合わせ</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="inputMessage">
+          お問い合わせ内容 <span class="required">※必須</span>
+        </label>
+        <textarea
+          class="form-textarea" id="inputMessage"
+          placeholder="お問い合わせ内容をご記入ください" required></textarea>
+      </div>
+
+      <button class="submit-btn" type="submit" id="submitBtn">
+        送 信 す る
+      </button>
+
+      <p class="form-notice">
+        Google フォームでパスワードを送信しないでください。<br>
+        内容確認後、3〜5営業日以内にご返信いたします。
+      </p>
+
+    </form>
+
+    <!-- ── 送信完了メッセージ ── -->
+    <div class="result-msg" id="successMsg">
+      <div class="result-icon">✅</div>
+      <p class="result-title">送信が完了しました</p>
+      <p class="result-body">
+        お問い合わせいただきありがとうございます。<br>
+        内容を確認のうえ、3〜5営業日以内にご返信いたします。
+      </p>
+      <a class="result-back" href="index.html">← TOPへ戻る</a>
+    </div>
+
+    <!-- ── エラーメッセージ ── -->
+    <div class="result-msg" id="errorMsg">
+      <div class="result-icon">⚠️</div>
+      <p class="result-title">送信に失敗しました</p>
+      <p class="result-body">
+        通信エラーが発生しました。<br>
+        しばらく経ってから再度お試しください。
+      </p>
+      <button class="result-back" onclick="resetForm()">← フォームに戻る</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  /* ══════════════════════════════════
+     Google Forms 送信先
+  ══════════════════════════════════ */
+  const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScm1PJ77lWkO8Qw86BIRROkm4n3CVpBaxoexHZA1NJCc3V7-g/formResponse';
+
+  const ENTRY = {
+    name:    'entry.364223754',
+    email:   'entry.555149849',
+    subject: 'entry.1327937472',
+    message: 'entry.328830998',
+  };
+
+  /* ══════════════════════════════════
+     フォーム送信処理
+  ══════════════════════════════════ */
+  document.getElementById('contactForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="sending-spinner"></span>送信中...';
+
+    const body = new FormData();
+    body.append(ENTRY.name,    document.getElementById('inputName').value.trim());
+    body.append(ENTRY.email,   document.getElementById('inputEmail').value.trim());
+    body.append(ENTRY.subject, document.getElementById('inputSubject').value);
+    body.append(ENTRY.message, document.getElementById('inputMessage').value.trim());
+
+    try {
+      await fetch(FORM_URL, { method: 'POST', mode: 'no-cors', body });
+      showResult('success');
+    } catch (err) {
+      showResult('error');
+      btn.disabled = false;
+      btn.textContent = '送 信 す る';
+    }
+  });
+
+  function showResult(type) {
+    document.getElementById('contactForm').style.display = 'none';
+    if (type === 'success') {
+      document.getElementById('successMsg').classList.add('visible');
+    } else {
+      document.getElementById('errorMsg').classList.add('visible');
+    }
+  }
+
+  function resetForm() {
+    document.getElementById('contactForm').style.display = 'block';
+    document.getElementById('errorMsg').classList.remove('visible');
+    document.getElementById('submitBtn').disabled = false;
+    document.getElementById('submitBtn').textContent = '送 信 す る';
+  }
+
+  /* ══════════════════════════════════
+     ハンバーガーメニュー
+  ══════════════════════════════════ */
+  const btn    = document.getElementById('menuBtn');
+  const drawer = document.getElementById('drawer');
+
+  btn.addEventListener('click', () => {
+    const isOpen = drawer.classList.toggle('open');
+    btn.classList.toggle('open', isOpen);
+    btn.setAttribute('aria-label', isOpen ? 'メニューを閉じる' : 'メニューを開く');
+  });
+
+  document.addEventListener('click', e => {
+    if (!drawer.contains(e.target) && !btn.contains(e.target)) {
+      drawer.classList.remove('open');
+      btn.classList.remove('open');
+    }
+  });
+</script>
+</body>
+</html>
