@@ -487,8 +487,29 @@
     }).format(date);
   }
 
+  /* ══════════════════════════════════
+     セキュリティ：サニタイズ関数
+  ══════════════════════════════════ */
+  function escapeHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function safeUrl(url) {
+    if (!url) return '';
+    return /^https?:\/\//i.test(String(url).trim()) ? String(url).trim() : '';
+  }
+
   function eventUrl(event) {
-    return event.url ? `https://luma.com/${event.url}` : LUMA_PAST_PAGE_URL;
+    if (event.url) {
+      const slug = String(event.url).replace(/[^a-zA-Z0-9\-_]/g, '');
+      return `https://luma.com/${slug}`;
+    }
+    return LUMA_PAST_PAGE_URL;
   }
 
   function renderPastEvents(events) {
@@ -498,15 +519,25 @@
     }
 
     pastEvents.innerHTML = `<div class="event-grid">${events.map(event => {
-      const cover = event.cover_url || event.social_image_url || 'https://images.lumacdn.com/social-images/default-2604.png';
-      const venue = event.geo_address_json?.city || event.geo_address_json?.address || event.location_info?.name || '';
-      const host = Array.isArray(event.hosts) && event.hosts.length ? event.hosts.map(item => item.name).join(' / ') : '';
+      const cover    = safeUrl(event.cover_url || event.social_image_url)
+                       || 'https://images.lumacdn.com/social-images/default-2604.png';
+      const venue    = escapeHtml(
+                         event.geo_address_json?.city ||
+                         event.geo_address_json?.address ||
+                         event.location_info?.name || ''
+                       );
+      const host     = Array.isArray(event.hosts) && event.hosts.length
+                       ? event.hosts.map(item => escapeHtml(item.name)).join(' / ')
+                       : '';
+      const safeName = escapeHtml(event.name);
+      const safeLink = eventUrl(event);
+
       return `
-        <a class="event-card" href="${eventUrl(event)}" target="_blank" rel="noopener noreferrer">
-          <img class="event-cover" src="${cover}" alt="${event.name}のカバー画像" loading="lazy">
+        <a class="event-card" href="${safeLink}" target="_blank" rel="noopener noreferrer">
+          <img class="event-cover" src="${cover}" alt="${safeName}のカバー画像" loading="lazy">
           <div class="event-card-body">
             <p class="event-date">${formatEventDate(event.start_at, event.timezone || 'Asia/Tokyo')}</p>
-            <h2 class="event-title">${event.name}</h2>
+            <h2 class="event-title">${safeName}</h2>
             ${venue ? `<p class="event-meta">${venue}</p>` : ''}
             ${host ? `<p class="event-meta">${host}</p>` : ''}
           </div>
