@@ -151,6 +151,75 @@
       display: block;
     }
 
+
+    /* ── 過去イベントカード ── */
+    .event-list {
+      display: none;
+      padding: 28px;
+      min-height: 480px;
+    }
+    .event-list.visible { display: block; }
+    .event-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+    }
+    .event-card {
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+      overflow: hidden;
+      background: rgba(0, 0, 30, 0.5);
+      border: 1px solid rgba(100, 80, 200, 0.32);
+      border-radius: 12px;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+    .event-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(0, 180, 255, 0.65);
+      box-shadow: 0 0 18px rgba(0, 150, 255, 0.25);
+    }
+    .event-cover {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      background: rgba(0, 20, 60, 0.45);
+    }
+    .event-card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 16px;
+    }
+    .event-date {
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      color: rgba(0, 210, 255, 0.86);
+    }
+    .event-title {
+      font-family: 'Shippori Mincho B1', serif;
+      font-size: 1.02rem;
+      line-height: 1.55;
+      color: #fff;
+    }
+    .event-meta {
+      font-size: 0.82rem;
+      line-height: 1.6;
+      color: rgba(190, 180, 240, 0.78);
+    }
+    .event-empty {
+      display: flex;
+      min-height: 360px;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: rgba(190, 180, 240, 0.78);
+      line-height: 1.9;
+      font-family: 'Shippori Mincho B1', serif;
+      letter-spacing: 0.08em;
+    }
     /* ── ローディング表示 ── */
     .luma-loading {
       position: absolute; inset: 0;
@@ -315,6 +384,9 @@
         sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox"
       ></iframe>
 
+
+      <!-- 過去イベント（Luma API経由で表示） -->
+      <div class="event-list" id="pastEvents" aria-live="polite"></div>
       <!-- フォールバック（JS制御） -->
       <div class="luma-fallback" id="lumaFallback">
         <div class="fallback-icon">📅</div>
@@ -339,48 +411,158 @@
 </div>
 
 <script>
-  /* ── URL定義 ── */
-  const LUMA_URLS = {
-    upcoming: 'https://luma.com/embed/calendar/cal-X9BFj91zWwrWasK/events',
-    past: 'https://luma.com/embed/calendar/cal-X9BFj91zWwrWasK'
-  };
+  /* ── Luma設定 ── */
+  const LUMA_CALENDAR_ID = 'cal-X9BFj91zWwrWasK';
+  const LUMA_EMBED_URL = `https://luma.com/embed/calendar/${LUMA_CALENDAR_ID}/events`;
+  const LUMA_PAST_PAGE_URL = `https://luma.com/calendar/${LUMA_CALENDAR_ID}/past-events`;
 
-  const frame    = document.getElementById('lumaFrame');
-  const loading  = document.getElementById('lumaLoading');
-  const fallback = document.getElementById('lumaFallback');
+  // CORS回避用の中継APIを設定してください。
+  // 例: const LUMA_PROXY_URL = 'https://your-worker.example.workers.dev';
+  const LUMA_PROXY_URL = 'https://luma-proxy.kintsuba24.workers.dev/';
+
+  const frame      = document.getElementById('lumaFrame');
+  const loading    = document.getElementById('lumaLoading');
+  const fallback   = document.getElementById('lumaFallback');
+  const pastEvents = document.getElementById('pastEvents');
   let loadTimer;
+  let pastEventsLoaded = false;
 
-  /* ── ローディング開始 ── */
-  function startLoad() {
+  function showLoading() {
     clearTimeout(loadTimer);
     loading.classList.remove('hidden');
     fallback.classList.remove('visible');
+  }
+
+  function hideLoading() {
+    clearTimeout(loadTimer);
+    loading.classList.add('hidden');
+  }
+
+  function showFallback(message, url = 'https://luma.com/JP-dennouyokocho') {
+    hideLoading();
+    frame.style.display = 'none';
+    pastEvents.classList.remove('visible');
+    fallback.classList.add('visible');
+    const messageEl = fallback.querySelector('.fallback-msg');
+    const lumaLink = fallback.querySelector('.fallback-btn.luma');
+    if (messageEl) messageEl.innerHTML = message;
+    if (lumaLink) lumaLink.href = url;
+  }
+
+  function startIframeLoad() {
+    showLoading();
+    fallback.classList.remove('visible');
+    pastEvents.classList.remove('visible');
     frame.style.display = 'block';
-
-    frame.addEventListener('load', onLoad, { once: true });
-
+    frame.addEventListener('load', onIframeLoad, { once: true });
     loadTimer = setTimeout(() => {
-      loading.classList.add('hidden');
-      frame.style.display = 'none';
-      fallback.classList.add('visible');
+      showFallback('イベント情報を読み込めませんでした。<br>以下のリンクから直接ご確認ください。');
     }, 10000);
   }
 
-  function onLoad() {
-    clearTimeout(loadTimer);
-    loading.classList.add('hidden');
+  function onIframeLoad() {
+    hideLoading();
+  }
+
+  function getPastEventsUrl() {
+    if (!LUMA_PROXY_URL) return '';
+    const separator = LUMA_PROXY_URL.includes('?') ? '&' : '?';
+    return `${LUMA_PROXY_URL}${separator}calendar_api_id=${encodeURIComponent(LUMA_CALENDAR_ID)}&period=past`;
+  }
+
+  function normalizeEvents(payload) {
+    const entries = Array.isArray(payload?.entries) ? payload.entries : [];
+    return entries
+      .map(entry => entry.event || entry)
+      .filter(event => event && event.name && event.start_at)
+      .sort((a, b) => new Date(b.start_at) - new Date(a.start_at));
+  }
+
+  function formatEventDate(value, timezone = 'Asia/Tokyo') {
+    const date = new Date(value);
+    return new Intl.DateTimeFormat('ja-JP', {
+      timeZone: timezone,
+      year: 'numeric', month: 'long', day: 'numeric', weekday: 'short',
+      hour: '2-digit', minute: '2-digit'
+    }).format(date);
+  }
+
+  function eventUrl(event) {
+    return event.url ? `https://luma.com/${event.url}` : LUMA_PAST_PAGE_URL;
+  }
+
+  function renderPastEvents(events) {
+    if (!events.length) {
+      pastEvents.innerHTML = '<div class="event-empty">過去イベントはまだありません。</div>';
+      return;
+    }
+
+    pastEvents.innerHTML = `<div class="event-grid">${events.map(event => {
+      const cover = event.cover_url || event.social_image_url || 'https://images.lumacdn.com/social-images/default-2604.png';
+      const venue = event.geo_address_json?.city || event.geo_address_json?.address || event.location_info?.name || '';
+      const host = Array.isArray(event.hosts) && event.hosts.length ? event.hosts.map(item => item.name).join(' / ') : '';
+      return `
+        <a class="event-card" href="${eventUrl(event)}" target="_blank" rel="noopener noreferrer">
+          <img class="event-cover" src="${cover}" alt="${event.name}のカバー画像" loading="lazy">
+          <div class="event-card-body">
+            <p class="event-date">${formatEventDate(event.start_at, event.timezone || 'Asia/Tokyo')}</p>
+            <h2 class="event-title">${event.name}</h2>
+            ${venue ? `<p class="event-meta">${venue}</p>` : ''}
+            ${host ? `<p class="event-meta">${host}</p>` : ''}
+          </div>
+        </a>`;
+    }).join('')}</div>`;
+  }
+
+  async function loadPastEvents() {
+    frame.style.display = 'none';
+    fallback.classList.remove('visible');
+    pastEvents.classList.add('visible');
+
+    if (pastEventsLoaded) return;
+
+    const url = getPastEventsUrl();
+    if (!url) {
+      showFallback(
+        '過去イベントをHP内に表示するには中継APIのURL設定が必要です。<br>以下のリンクからLumaの過去イベントをご確認ください。',
+        LUMA_PAST_PAGE_URL
+      );
+      return;
+    }
+
+    showLoading();
+    try {
+      const response = await fetch(url, { cache: 'no-store' });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const payload = await response.json();
+      renderPastEvents(normalizeEvents(payload));
+      pastEventsLoaded = true;
+      hideLoading();
+    } catch (error) {
+      showFallback(
+        '過去イベントを読み込めませんでした。<br>以下のリンクからLumaの過去イベントをご確認ください。',
+        LUMA_PAST_PAGE_URL
+      );
+    }
   }
 
   /* ── タブ切り替え ── */
   function switchTab(type) {
     document.getElementById('tabUpcoming').classList.toggle('active', type === 'upcoming');
     document.getElementById('tabPast').classList.toggle('active', type === 'past');
-    startLoad();
-    frame.src = LUMA_URLS[type];
+
+    if (type === 'past') {
+      loadPastEvents();
+      return;
+    }
+
+    pastEvents.classList.remove('visible');
+    frame.src = LUMA_EMBED_URL;
+    startIframeLoad();
   }
 
   /* ── 初期ロード ── */
-  startLoad();
+  startIframeLoad();
 
   /* ── ハンバーガーメニュー ── */
   const btn    = document.getElementById('menuBtn');
