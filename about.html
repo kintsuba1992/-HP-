@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>代表紹介 | にほん電脳横丁</title>
+  <title>にほん電脳横丁とは？ | にほん電脳横丁</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;700;800&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
@@ -317,6 +317,71 @@
     }
 
     /* ══════════════════════════════════
+       TABS
+    ══════════════════════════════════ */
+    .tab-wrap {
+      display: flex; gap: 8px;
+      max-width: 860px; width: 100%;
+      margin: 0 auto 28px;
+    }
+    .tab-btn {
+      flex: 1; padding: 13px 0;
+      font-family: 'Shippori Mincho B1', serif;
+      font-size: clamp(0.82rem, 1.4vw, 1rem);
+      letter-spacing: 0.15em;
+      color: rgba(180, 165, 255, 0.75);
+      background: rgba(5, 0, 25, 0.65);
+      border: 1px solid rgba(100, 60, 255, 0.25);
+      border-radius: 10px; cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(8px);
+    }
+    .tab-btn:hover {
+      color: #fff;
+      border-color: rgba(0, 180, 255, 0.5);
+      background: rgba(0, 50, 180, 0.15);
+    }
+    .tab-btn.active {
+      color: #fff;
+      background: rgba(0, 60, 200, 0.25);
+      border-color: var(--cyan);
+      box-shadow: 0 0 14px rgba(0, 150, 255, 0.35);
+      text-shadow: 0 0 10px rgba(0, 200, 255, 0.7);
+    }
+    .tab-content        { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ══════════════════════════════════
+       ABOUT CARD
+    ══════════════════════════════════ */
+    .about-card {
+      max-width: 860px; margin: 0 auto;
+      background: rgba(5, 0, 25, 0.72);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(100, 60, 255, 0.25);
+      border-radius: 18px; padding: 40px 48px;
+      position: relative; overflow: hidden;
+    }
+    .about-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(0,160,255,0.6), rgba(160,0,255,0.6), transparent);
+    }
+    .about-paragraph {
+      font-size: clamp(0.9rem, 1.4vw, 1.05rem);
+      line-height: 2.1; color: rgba(210, 200, 240, 0.88);
+      margin-bottom: 1.6em; text-align: justify;
+    }
+    .about-paragraph:last-of-type { margin-bottom: 0; }
+    .about-tagline {
+      font-family: 'Shippori Mincho B1', serif;
+      font-size: clamp(1.1rem, 2vw, 1.5rem); font-weight: 700;
+      letter-spacing: 0.2em; color: #fff; text-align: center;
+      margin-top: 2em; padding-top: 1.6em;
+      border-top: 1px solid rgba(0, 160, 255, 0.2);
+      text-shadow: 0 0 12px rgba(0, 200, 255, 0.7), 0 0 30px rgba(100, 0, 255, 0.4);
+    }
+
+    /* ══════════════════════════════════
        RESPONSIVE
     ══════════════════════════════════ */
     @media (max-width: 768px) {
@@ -331,6 +396,7 @@
       }
       .page-title h1 { font-size: 1.6rem; }
       .profile-photo { width: 110px; height: 110px; }
+      .about-card { padding: 28px 22px; }
     }
   </style>
 </head>
@@ -344,7 +410,7 @@
 <!-- ── ドロワーメニュー ── -->
 <nav class="drawer" id="drawer">
   <a class="drawer-item top" href="index.html">◀ TOPへ戻る</a>
-  <a class="drawer-item" href="about.html">代表紹介</a>
+  <a class="drawer-item" href="about.html">にほん電脳横丁とは？</a>
   <a class="drawer-item" href="projects.html">横丁推しプロジェクト</a>
   <a class="drawer-item" href="events.html">イベント情報</a>
   <a class="drawer-item" href="contact.html">問い合わせ</a>
@@ -353,11 +419,30 @@
 <!-- ── メインコンテンツ ── -->
 <div class="page-wrapper">
 
-  <div class="page-title">
-    <h1>代 表 紹 介</h1>
-    <div class="page-title-line"></div>
+  <!-- ── タブボタン ── -->
+  <div class="tab-wrap">
+    <button class="tab-btn active" id="tabAbout"   onclick="switchTab('about')">にほん電脳横丁とは？</button>
+    <button class="tab-btn"        id="tabProfile" onclick="switchTab('profile')">代 表 紹 介</button>
   </div>
 
+  <!-- ── タブ①：にほん電脳横丁とは？ ── -->
+  <div class="tab-content active" id="contentAbout">
+    <div class="about-card">
+      <p class="about-paragraph">
+        にほん電脳横丁は、日本発の「電脳文化コミュニティ」です。Web3、AI、NFT、デジタルアート、VTuber、ゲーム、ボードゲーム、メタバース、伝統文化×テクノロジーなど、多様なデジタルカルチャーに関わるプロジェクト・企業・クリエイター・ユーザーが集い、交流・共創・発信を行う"現代版の横丁"として活動しています。
+      </p>
+      <p class="about-paragraph">
+        コミュニティ内では、AMA・共同キャンペーン・イベント・交流会・情報発信・プロジェクト連携などを通じて日々新たなコラボレーションが生まれています。国内外のプロジェクトやファウンダー、クリエイターとの連携も積極的に行い、日本市場向けの認知拡大やユーザーオンボーディング、コミュニティ形成支援にも取り組んでいます。
+      </p>
+      <p class="about-paragraph">
+        単なるWeb3コミュニティではなく、AI・NFT・デジタルアート・VTuber・ゲーム・ミーム文化・伝統文化×テクノロジーなど多様な領域との融合を歓迎。テクノロジーと文化、人と人、プロジェクトとユーザーをつなぎ、日本発の新しい電脳文化圏を創ることを目的としています。
+      </p>
+      <p class="about-tagline">「技術を文化へ、文化を未来へ。」</p>
+    </div>
+  </div>
+
+  <!-- ── タブ②：代表紹介 ── -->
+  <div class="tab-content" id="contentProfile">
   <div class="cards-grid">
 
     <!-- ── 1人目：ゆんける ── -->
@@ -389,7 +474,7 @@
       <p class="profile-name-sub">&nbsp;</p>
       <div class="profile-divider"></div>
       <p class="profile-bio">
-        2017年に$XRPの購入をきっかけに仮想通貨デビュー（現在も保有）。2024年4月にBitgetWallet公式ミームコインである"$MOEW"のエアドロやBGBホワイトリストに当選。それを機にWeb3へ本格的に入り込み、テレグラムでMOEW非公式コミュニティを海外ホルダーとともに創設し、公式化後の現在も無報酬で従事中。普段は都内で会社員として働きながら、BitgetWallet日本公式コミュニティ統括を担当しています。Web3を始めとした電脳世界を探求しています。<br>特技：料理(炊事担当)／趣味：筋トレ、洋画鑑賞／好きなもの：動物(主に猫とマレーグマ)、バイク
+        2017年に$XRPの購入をきっかけに仮想通貨デビュー（現在も保有）。2024年4月にBitgetWallet公式ミームコインである"$MOEW"のエアドロやBGBホワイトリストに当選。それを機にWeb3へ本格的に入り込み、テレグラムでMOEW非公式コミュニティを海外ホルダーとともに創設し、公式化後の現在も無報酬で従事中。普段は都内で会社員として働きながら、BitgetWallet日本公式コミュニティ統括を担当しています。Web3を始めとした電脳世界を探求しています。<br>特技：料理(炊事担当)<br>趣味：筋トレ、洋画鑑賞<br>好きなもの：動物(主に猫とマレーグマ)、バイク
       </p>
       <a class="profile-sns" href="https://x.com/kintsuba1992">@kintsuba1992</a>
       <p class="profile-activities-title">その他の活動</p>
@@ -402,9 +487,17 @@
     </div>
 
   </div>
+  </div><!-- /contentProfile -->
 </div>
 
 <script>
+  function switchTab(type) {
+    document.getElementById('tabAbout').classList.toggle('active',   type === 'about');
+    document.getElementById('tabProfile').classList.toggle('active', type === 'profile');
+    document.getElementById('contentAbout').classList.toggle('active',   type === 'about');
+    document.getElementById('contentProfile').classList.toggle('active', type === 'profile');
+  }
+
   const btn    = document.getElementById('menuBtn');
   const drawer = document.getElementById('drawer');
 
