@@ -256,6 +256,67 @@
       .bottom-nav  { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; }
       /* 参加ボタン：モバイルは小さく右上表示 */
       .join-btn    { font-size: 0.7rem; padding: 7px 14px; top: 14px; right: 14px; letter-spacing: 0.08em; }
+
+      /* ══════════════════════════════════
+         モバイル：下部ナビ → ハンバーガー方式
+      ══════════════════════════════════ */
+      .bottom-nav {
+        display: flex; align-items: center; justify-content: center;
+        height: 56px;
+      }
+      .bottom-nav .nav-item,
+      .bottom-nav .nav-sep { display: none; }
+
+      .mobile-nav-toggle {
+        display: flex; align-items: center; justify-content: center;
+        gap: 10px;
+        width: 100%; height: 100%;
+        background: none; border: none;
+        color: #fff;
+        font-family: 'Shippori Mincho B1', serif;
+        font-size: 0.9rem; letter-spacing: 0.15em;
+        cursor: pointer;
+      }
+      .mobile-nav-toggle .bar-icon {
+        display: inline-flex; flex-direction: column; gap: 4px;
+      }
+      .mobile-nav-toggle .bar-icon span {
+        display: block; width: 22px; height: 2px;
+        background: var(--cyan); border-radius: 2px;
+        box-shadow: 0 0 6px var(--cyan);
+        transition: all 0.3s ease;
+      }
+      .mobile-nav-toggle.open .bar-icon span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+      .mobile-nav-toggle.open .bar-icon span:nth-child(2) { opacity: 0; }
+      .mobile-nav-toggle.open .bar-icon span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+      /* 下から展開するドロワー */
+      .mobile-nav-drawer {
+        position: fixed; left: 0; right: 0; bottom: 56px;
+        z-index: 49;
+        background: rgba(3, 0, 12, 0.95);
+        backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        border-top: 1px solid rgba(100, 60, 255, 0.3);
+        transform: translateY(100%);
+        transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .mobile-nav-drawer.open { transform: translateY(0); }
+      .mobile-nav-drawer a {
+        display: block;
+        padding: 16px 24px;
+        text-decoration: none;
+        color: #fff;
+        font-family: 'Shippori Mincho B1', serif;
+        font-size: 1rem; letter-spacing: 0.15em;
+        border-bottom: 1px solid rgba(100, 50, 200, 0.2);
+        transition: all 0.2s ease;
+      }
+      .mobile-nav-drawer a:last-child { border-bottom: none; }
+      .mobile-nav-drawer a:active,
+      .mobile-nav-drawer a:hover {
+        background: rgba(0, 80, 220, 0.14);
+        text-shadow: 0 0 10px var(--cyan);
+      }
     }
 
     @media (max-width: 420px) {
@@ -316,7 +377,21 @@
     <a class="nav-item" href="events.html">イベント情報</a>
     <div class="nav-sep" aria-hidden="true"></div>
     <a class="nav-item" href="contact.html">お問い合わせ</a>
+
+    <!-- モバイル専用：ハンバーガートグル -->
+    <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="メニューを開く">
+      <span class="bar-icon"><span></span><span></span><span></span></span>
+      MENU
+    </button>
   </nav>
+
+  <!-- モバイル専用：下から展開するドロワー -->
+  <div class="mobile-nav-drawer" id="mobileNavDrawer">
+    <a href="about.html">にほん電脳横丁とは？</a>
+    <a href="projects.html">横丁推しプロジェクト</a>
+    <a href="events.html">イベント情報</a>
+    <a href="contact.html">お問い合わせ</a>
+  </div>
 </div>
 
 <script>
@@ -431,6 +506,25 @@
       setTimeout(() => { el.style.background = ''; }, 180);
     });
   });
+
+  /* モバイル：下部メニュー開閉 */
+  const mobileToggle = document.getElementById('mobileNavToggle');
+  const mobileDrawer = document.getElementById('mobileNavDrawer');
+
+  if (mobileToggle && mobileDrawer) {
+    mobileToggle.addEventListener('click', () => {
+      const isOpen = mobileDrawer.classList.toggle('open');
+      mobileToggle.classList.toggle('open', isOpen);
+      mobileToggle.setAttribute('aria-label', isOpen ? 'メニューを閉じる' : 'メニューを開く');
+    });
+
+    document.addEventListener('click', e => {
+      if (!mobileDrawer.contains(e.target) && !mobileToggle.contains(e.target)) {
+        mobileDrawer.classList.remove('open');
+        mobileToggle.classList.remove('open');
+      }
+    });
+  }
 </script>
 </body>
 </html>
