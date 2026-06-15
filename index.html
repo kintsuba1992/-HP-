@@ -229,6 +229,12 @@
       margin: 40px 0;
     }
 
+    /* PC用：モバイル専用ハンバーガー・ドロワーはデフォルト非表示 */
+    .mobile-nav-toggle,
+    .mobile-nav-drawer {
+      display: none;
+    }
+
     /* ══════════════════════════════════
        RESPONSIVE
     ══════════════════════════════════ */
@@ -242,8 +248,7 @@
       .site-wrapper { height: 100dvh; overflow: hidden; }
       .hero {
         /* overflow:hiddenは付けない → テキストが切り取られる原因になる */
-        padding-bottom: 56px;
-        padding-top: 24px;
+        padding-bottom: var(--nav-h);
       }
       :root { --nav-h: 88px; }
       /* hero-gapをdvh単位に統一（vh=ブラウザUI込みの高さで不一致が起きる） */
@@ -293,6 +298,7 @@
 
       /* 下から展開するドロワー */
       .mobile-nav-drawer {
+        display: block;
         position: fixed; left: 0; right: 0; bottom: 56px;
         z-index: 49;
         background: rgba(3, 0, 12, 0.95);
