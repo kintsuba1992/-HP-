@@ -382,6 +382,87 @@
     }
 
     /* ══════════════════════════════════
+       AMBASSADOR CARDS
+    ══════════════════════════════════ */
+    .amb-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .amb-card {
+      background: rgba(5, 0, 25, 0.70);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(100, 60, 255, 0.25);
+      border-radius: 16px;
+      padding: 28px 22px;
+      transition: all 0.3s ease;
+      position: relative; overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+    .amb-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(0,160,255,0.6), rgba(160,0,255,0.6), transparent);
+    }
+    .amb-card:hover {
+      border-color: rgba(0, 180, 255, 0.4);
+      box-shadow: 0 8px 36px rgba(0, 60, 200, 0.3);
+      transform: translateY(-4px);
+    }
+    .amb-photo {
+      width: 96px; height: 96px;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: top center;
+      border: 2px solid rgba(0, 180, 255, 0.5);
+      box-shadow: 0 0 14px rgba(0, 120, 255, 0.4), 0 0 32px rgba(100, 0, 255, 0.2);
+      display: block; margin: 0 auto 16px;
+    }
+    .amb-name {
+      font-family: 'Shippori Mincho B1', serif;
+      font-size: 1.1rem; font-weight: 700;
+      color: #fff; text-align: center;
+      letter-spacing: 0.08em; margin-bottom: 14px;
+      text-shadow: 0 0 10px rgba(0, 150, 255, 0.6);
+    }
+    .amb-section-title {
+      font-size: 0.7rem; letter-spacing: 0.12em;
+      color: rgba(150, 140, 200, 0.8);
+      margin-bottom: 4px; margin-top: 12px;
+    }
+    .amb-section-title:first-of-type { margin-top: 0; }
+    .amb-text {
+      font-size: 0.82rem; line-height: 1.8;
+      color: rgba(200, 190, 235, 0.85);
+      white-space: pre-wrap;
+    }
+    .amb-links {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      margin-top: 16px; padding-top: 14px;
+      border-top: 1px solid rgba(100, 60, 255, 0.18);
+    }
+    .amb-link-btn {
+      padding: 5px 12px; border-radius: 14px;
+      font-size: 0.72rem; letter-spacing: 0.05em;
+      text-decoration: none; color: rgba(190, 180, 240, 0.85);
+      border: 1px solid rgba(100, 80, 200, 0.3);
+      background: rgba(0, 30, 90, 0.25);
+      transition: all 0.2s ease;
+    }
+    .amb-link-btn:hover {
+      color: #fff;
+      border-color: rgba(0, 180, 255, 0.5);
+      background: rgba(0, 80, 200, 0.2);
+    }
+    .amb-empty {
+      text-align: center;
+      color: rgba(170, 160, 210, 0.6);
+      font-size: 0.9rem;
+      padding: 40px 0;
+    }
+
+    /* ══════════════════════════════════
        RESPONSIVE
     ══════════════════════════════════ */
     @media (max-width: 768px) {
@@ -397,6 +478,7 @@
       .page-title h1 { font-size: 1.6rem; }
       .profile-photo { width: 110px; height: 110px; }
       .about-card { padding: 28px 22px; }
+      .amb-grid { grid-template-columns: 1fr; gap: 20px; }
     }
   </style>
 </head>
@@ -421,8 +503,9 @@
 
   <!-- ── タブボタン ── -->
   <div class="tab-wrap">
-    <button class="tab-btn active" id="tabAbout"   onclick="switchTab('about')">にほん電脳横丁とは？</button>
-    <button class="tab-btn"        id="tabProfile" onclick="switchTab('profile')">代 表 紹 介</button>
+    <button class="tab-btn active" id="tabAbout"      onclick="switchTab('about')">にほん電脳横丁とは？</button>
+    <button class="tab-btn"        id="tabProfile"    onclick="switchTab('profile')">代 表 紹 介</button>
+    <button class="tab-btn"        id="tabAmbassador" onclick="switchTab('ambassador')">アンバサダー紹介</button>
   </div>
 
   <!-- ── タブ①：にほん電脳横丁とは？ ── -->
@@ -495,14 +578,118 @@
 
   </div>
   </div><!-- /contentProfile -->
+
+  <!-- ── タブ③：アンバサダー紹介 ── -->
+  <div class="tab-content" id="contentAmbassador">
+    <div class="amb-grid" id="ambGrid"></div>
+  </div>
 </div>
 
 <script>
+  /* ══════════════════════════════════
+     セキュリティ：サニタイズ関数
+  ══════════════════════════════════ */
+  function escapeHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function safeUrl(url) {
+    if (!url) return '';
+    return /^https?:\/\//i.test(String(url).trim()) ? String(url).trim() : '';
+  }
+
+  /* ══════════════════════════════════
+     GAS エンドポイント
+  ══════════════════════════════════ */
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbys_YB5UpKqlgSwPygCAd2_1Yix_Hf0Oj9H3e6B7HotP3Iwe8AfO2H6VGvKjg_hVYVq/exec';
+
+  let ambassadorsLoaded  = false;
+  let ambassadorsFetched = false;
+
+  function shuffleArray(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function createAmbassadorCard(amb) {
+    const safeName     = escapeHtml(amb.name);
+    const safeFilename = escapeHtml(amb.photo_filename);
+    const safeIntro    = escapeHtml(amb.intro);
+    const safeReason   = escapeHtml(amb.reason);
+
+    const photo = safeFilename
+      ? `<img class="amb-photo" src="./img/${safeFilename}" alt="${safeName}">`
+      : `<div class="amb-photo" style="background:rgba(0,80,180,0.3);display:flex;align-items:center;justify-content:center;font-size:1.8rem;">👤</div>`;
+
+    const links = [
+      safeUrl(amb.x_url)         ? `<a class="amb-link-btn" href="${safeUrl(amb.x_url)}">𝕏</a>`             : '',
+      safeUrl(amb.discord_url)   ? `<a class="amb-link-btn" href="${safeUrl(amb.discord_url)}">Discord</a>`  : '',
+      safeUrl(amb.telegram_url)  ? `<a class="amb-link-btn" href="${safeUrl(amb.telegram_url)}">Telegram</a>` : '',
+      safeUrl(amb.instagram_url) ? `<a class="amb-link-btn" href="${safeUrl(amb.instagram_url)}">Instagram</a>` : '',
+      safeUrl(amb.website_url)   ? `<a class="amb-link-btn" href="${safeUrl(amb.website_url)}">Website</a>`  : '',
+    ].filter(Boolean).join('');
+
+    return `
+      <div class="amb-card">
+        ${photo}
+        <p class="amb-name">${safeName}</p>
+        ${safeIntro ? `<p class="amb-section-title">自己紹介</p><p class="amb-text">${safeIntro}</p>` : ''}
+        ${safeReason ? `<p class="amb-section-title">参加理由・期待していること</p><p class="amb-text">${safeReason}</p>` : ''}
+        ${links ? `<div class="amb-links">${links}</div>` : ''}
+      </div>`;
+  }
+
+  async function loadAmbassadors() {
+    const grid = document.getElementById('ambGrid');
+    if (ambassadorsFetched) {
+      // 再訪のたびにシャッフルし直す
+      renderAmbassadors(ambassadorsLoaded);
+      return;
+    }
+    try {
+      const res     = await fetch(`${GAS_URL}?type=ambassadors`);
+      const payload = await res.json();
+      ambassadorsLoaded  = (payload.status === 'ok' && Array.isArray(payload.ambassadors)) ? payload.ambassadors : [];
+      ambassadorsFetched = true;
+      renderAmbassadors(ambassadorsLoaded);
+    } catch (err) {
+      grid.innerHTML = '';
+    }
+  }
+
+  function renderAmbassadors(list) {
+    const grid = document.getElementById('ambGrid');
+    if (!list || !list.length) {
+      grid.innerHTML = '';
+      return;
+    }
+    const shuffled = shuffleArray(list);
+    grid.innerHTML = shuffled.map(createAmbassadorCard).join('');
+  }
+
+  /* ══════════════════════════════════
+     タブ切り替え
+  ══════════════════════════════════ */
   function switchTab(type) {
-    document.getElementById('tabAbout').classList.toggle('active',   type === 'about');
-    document.getElementById('tabProfile').classList.toggle('active', type === 'profile');
-    document.getElementById('contentAbout').classList.toggle('active',   type === 'about');
-    document.getElementById('contentProfile').classList.toggle('active', type === 'profile');
+    document.getElementById('tabAbout').classList.toggle('active',      type === 'about');
+    document.getElementById('tabProfile').classList.toggle('active',    type === 'profile');
+    document.getElementById('tabAmbassador').classList.toggle('active', type === 'ambassador');
+    document.getElementById('contentAbout').classList.toggle('active',      type === 'about');
+    document.getElementById('contentProfile').classList.toggle('active',    type === 'profile');
+    document.getElementById('contentAmbassador').classList.toggle('active', type === 'ambassador');
+
+    if (type === 'ambassador') {
+      loadAmbassadors();
+    }
   }
 
   const btn    = document.getElementById('menuBtn');
