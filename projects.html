@@ -262,6 +262,7 @@
     .link-btn.telegram { border-color:rgba(0,136,204,0.4); color:#29b6f6; }
     .link-btn.instagram{ border-color:rgba(225,48,108,0.4); color:#f06292; }
     .link-btn.line     { border-color:rgba(6,199,85,0.4);   color:#06c755; }
+    .link-btn.youtube  { border-color:rgba(255,0,0,0.4);    color:#ff4444; }
     .link-btn:hover { background:rgba(255,255,255,0.06); transform:translateY(-1px); }
 
     /* ── ローディング / エラー / 空 ── */
@@ -383,7 +384,8 @@
       telegram_url: '',
       instagram_url: '',
       logo_filename: 'minara_avatar.png',
-      line_url: ''
+      line_url: '',
+      youtube_url: ''
     }
   ];
 
@@ -391,6 +393,16 @@
      状態
   ══════════════════════════════════ */
   let allProjects  = [];
+
+  /* Fisher-Yatesシャッフル */
+  function shuffleArray(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
   let selectedTags = [];
   let filterMode   = 'OR'; // 'OR' | 'AND'
 
@@ -411,7 +423,7 @@
       const res  = await fetch(GAS_URL);
       const data = await res.json();
       if (data.status === 'ok') {
-        allProjects = data.projects;
+        allProjects = shuffleArray(data.projects);
         renderProjects(allProjects);
       } else {
         showError('データの取得に失敗しました');
@@ -537,6 +549,7 @@
       safeUrl(p.telegram_url)  ? `<a class="link-btn telegram"  href="${safeUrl(p.telegram_url)}">Telegram</a>` : '',
       safeUrl(p.instagram_url) ? `<a class="link-btn instagram" href="${safeUrl(p.instagram_url)}">Instagram</a>` : '',
       safeUrl(p.line_url)      ? `<a class="link-btn line"      href="${safeUrl(p.line_url)}">LINE</a>` : '',
+      safeUrl(p.youtube_url)   ? `<a class="link-btn youtube"   href="${safeUrl(p.youtube_url)}">YouTube</a>` : '',
     ].filter(Boolean).join('');
 
     const safeName     = escapeHtml(p.name);
