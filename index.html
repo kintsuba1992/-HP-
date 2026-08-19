@@ -187,8 +187,10 @@
       color: #FFFFFF;
       text-shadow: 0 0 10px rgba(0, 200, 255, 0.9), 0 1px 3px rgba(0, 0, 0, 0.9);
       white-space: nowrap;
-      pointer-events: none;
+      text-decoration: none;
+      transition: opacity 0.2s ease;
     }
+    .join-note:hover { opacity: 0.75; }
 
     /* ── コピーライト（ナビ右下） ── */
     .copyright-nav {
@@ -268,6 +270,61 @@
     }
 
     /* ══════════════════════════════════
+       お知らせ欄
+    ══════════════════════════════════ */
+    .notices-wrap {
+      position: fixed;
+      top: 18px;
+      left: 20px;
+      z-index: 100;
+      width: 260px;
+    }
+    .notices-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(3, 0, 18, 0.88);
+      border: 1px solid rgba(0, 150, 255, 0.35);
+      border-radius: 10px 10px 0 0;
+      padding: 8px 14px;
+      cursor: default;
+      backdrop-filter: blur(10px);
+    }
+    .notices-header-title {
+      font-family: 'Shippori Mincho B1', serif;
+      font-size: 0.78rem; letter-spacing: 0.12em;
+      color: rgba(200, 220, 255, 0.9);
+      text-shadow: 0 0 8px rgba(0, 150, 255, 0.6);
+    }
+    .notices-body {
+      background: rgba(3, 0, 18, 0.82);
+      border: 1px solid rgba(0, 150, 255, 0.25);
+      border-top: none;
+      border-radius: 0 0 10px 10px;
+      padding: 8px 0;
+      backdrop-filter: blur(10px);
+    }
+    .notice-item {
+      display: block;
+      padding: 7px 14px;
+      font-size: 0.75rem; line-height: 1.5;
+      letter-spacing: 0.04em;
+      color: rgba(200, 195, 240, 0.85);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(100, 60, 255, 0.15);
+      transition: all 0.2s ease;
+    }
+    .notice-item:last-child { border-bottom: none; }
+    .notice-item:hover {
+      color: #fff;
+      background: rgba(0, 80, 200, 0.12);
+      text-shadow: 0 0 8px rgba(0, 180, 255, 0.5);
+    }
+    .notice-empty {
+      padding: 8px 14px;
+      font-size: 0.72rem;
+      color: rgba(160, 155, 200, 0.6);
+    }
+
+    /* ══════════════════════════════════
        RESPONSIVE
     ══════════════════════════════════ */
     @media (max-width: 768px) {
@@ -297,6 +354,13 @@
       .join-wrap { top: 14px; right: 14px; }
       .join-btn  { font-size: 0.7rem; padding: 7px 14px; letter-spacing: 0.08em; }
       .join-note { font-size: 0.62rem; }      .copyright-nav { font-size: 0.52rem; bottom: 4px; right: 8px; }
+
+      /* モバイル：お知らせ欄は開閉式 */
+      .notices-wrap { width: calc(100vw - 40px); }
+      .notices-header { cursor: pointer; border-radius: 10px; }
+      .notices-header.open { border-radius: 10px 10px 0 0; }
+      .notices-body { display: none; }
+      .notices-body.open { display: block; }
 
       /* ══════════════════════════════════
          モバイル：下部ナビ → ハンバーガー方式
@@ -392,6 +456,17 @@
 
 <canvas id="bg-canvas"></canvas>
 
+<!-- ── お知らせ欄 ── -->
+<div class="notices-wrap" id="noticesWrap">
+  <div class="notices-header" id="noticesHeader">
+    <span class="notices-header-title">📢 お知らせ</span>
+    <span class="notices-toggle" id="noticesToggle" style="font-size:0.7rem; color:rgba(180,200,255,0.7);">▼</span>
+  </div>
+  <div class="notices-body" id="noticesBody">
+    <p class="notice-empty">読み込み中...</p>
+  </div>
+</div>
+
 <div class="site-wrapper">
 
   <!-- Hero text overlay -->
@@ -407,9 +482,9 @@
     <!-- 参加ボタン（PC右側絶対配置） -->
   <div class="join-wrap">
      <a class="join-btn" href="https://t.me/+6YUz1XskPIYxMDll">
-       にほん電脳横丁へ参加する
+       コミュニティ(Telegram)に参加する
      </a>
-     <p class="join-note">✈ Telegramコミュニティはこちら</p>
+     <a class="join-note" href="https://x.com/nihondenno" target="_blank" rel="noopener noreferrer" style="pointer-events:auto;">Xアカウントはこちら</a>
   </div>
   </main>
 
@@ -441,7 +516,57 @@
 </div>
 
 <script>
-  /* Sakura + digital particle canvas */
+  /* ══════════════════════════════════
+     お知らせ欄
+  ══════════════════════════════════ */
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbys_YB5UpKqlgSwPygCAd2_1Yix_Hf0Oj9H3e6B7HotP3Iwe8AfO2H6VGvKjg_hVYVq/exec'; // projects.htmlと同じGAS URLを設定
+
+  function escapeHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  function safeUrl(url) {
+    if (!url) return '#';
+    return /^https?:\/\//i.test(String(url).trim()) ? String(url).trim() : '#';
+  }
+
+  async function loadNotices() {
+    const body = document.getElementById('noticesBody');
+    try {
+      const res     = await fetch(`${GAS_URL}?type=notices`);
+      const payload = await res.json();
+      const list    = (payload.status === 'ok' && Array.isArray(payload.notices))
+                      ? payload.notices.slice(0, 5) : [];
+      if (!list.length) {
+        body.innerHTML = '<p class="notice-empty">お知らせはありません</p>';
+      } else {
+        body.innerHTML = list.map(n =>
+          `<a class="notice-item" href="${safeUrl(n.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(n.title)}</a>`
+        ).join('');
+      }
+    } catch (err) {
+      body.innerHTML = '<p class="notice-empty">お知らせはありません</p>';
+    }
+  }
+  loadNotices();
+
+  /* モバイル：開閉トグル */
+  const noticesHeader = document.getElementById('noticesHeader');
+  const noticesBody   = document.getElementById('noticesBody');
+  const noticesToggle = document.getElementById('noticesToggle');
+  const isMobile = () => window.innerWidth <= 768;
+
+  noticesHeader.addEventListener('click', () => {
+    if (!isMobile()) return;
+    const isOpen = noticesBody.classList.toggle('open');
+    noticesHeader.classList.toggle('open', isOpen);
+    noticesToggle.textContent = isOpen ? '▲' : '▼';
+  });
+
+  /* ══════════════════════════════════
+     Canvas アニメーション
+  ══════════════════════════════════ */
   const canvas = document.getElementById('bg-canvas');
   const ctx    = canvas.getContext('2d');
 
