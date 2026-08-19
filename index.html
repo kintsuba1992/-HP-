@@ -181,25 +181,32 @@
 
     /* 参加ボタン下の注釈テキスト */
     .join-note {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
       text-align: center;
-      font-size: 0.72rem;
-      letter-spacing: 0.1em;
+      font-family: 'Shippori Mincho B1', serif;
+      font-size: clamp(0.75rem, 1.1vw, 0.9rem);
+      letter-spacing: 0.15em;
       color: var(--cyan);
       text-decoration: none;
-      border: 1px solid rgba(0, 200, 255, 0.45);
-      border-radius: 20px;
-      padding: 5px 16px;
-      background: rgba(0, 30, 80, 0.55);
-      backdrop-filter: blur(6px);
-      transition: all 0.25s ease;
+      border: 1px solid rgba(0, 180, 255, 0.55);
+      border-radius: 30px;
+      padding: 14px 28px;
+      background: rgba(3, 0, 20, 0.78);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
       white-space: nowrap;
       text-shadow: 0 0 8px rgba(0, 200, 255, 0.6);
-      box-shadow: 0 0 10px rgba(0, 150, 255, 0.2);
+      box-shadow: 0 0 16px rgba(0, 100, 255, 0.3), inset 0 0 16px rgba(0, 100, 255, 0.08);
     }
     .join-note:hover {
+      border-color: rgba(0, 220, 255, 0.9);
       background: rgba(0, 60, 160, 0.65);
-      border-color: rgba(0, 220, 255, 0.8);
-      box-shadow: 0 0 18px rgba(0, 200, 255, 0.4);
+      box-shadow: 0 0 28px rgba(0, 150, 255, 0.55), inset 0 0 22px rgba(0, 150, 255, 0.15);
+      transform: translateY(-2px);
     }
 
     /* ── コピーライト（ナビ右下） ── */
@@ -370,7 +377,7 @@
       /* 参加ボタン：モバイルは小さく右上表示 */
       .join-wrap { top: 14px; right: 14px; }
       .join-btn  { font-size: 0.7rem; padding: 7px 14px; letter-spacing: 0.08em; }
-      .join-note { font-size: 0.62rem; }      .copyright-nav { font-size: 0.52rem; bottom: 4px; right: 8px; }
+      .join-note { font-size: 0.7rem; padding: 7px 14px; letter-spacing: 0.08em; }      .copyright-nav { font-size: 0.52rem; bottom: 4px; right: 8px; }
 
       /* モバイル：お知らせ欄は開閉式 */
       .notices-wrap { width: calc(100vw - 40px); }
@@ -548,27 +555,52 @@
     return /^https?:\/\//i.test(String(url).trim()) ? String(url).trim() : '#';
   }
 
+  const NOTICES_CACHE_KEY = 'notices_cache';
+  const NOTICES_CACHE_TTL = 5 * 60 * 1000; // 5分キャッシュ
+
   async function loadNotices() {
     const body = document.getElementById('noticesBody');
+
+    // キャッシュ確認
+    try {
+      const cached = sessionStorage.getItem(NOTICES_CACHE_KEY);
+      if (cached) {
+        const { data, ts } = JSON.parse(cached);
+        if (Date.now() - ts < NOTICES_CACHE_TTL) {
+          renderNotices(data, body);
+          return;
+        }
+      }
+    } catch (_) {}
+
     try {
       const res     = await fetch(`${GAS_URL}?type=notices`);
       const payload = await res.json();
       const list    = (payload.status === 'ok' && Array.isArray(payload.notices))
                       ? payload.notices.slice(0, 5) : [];
-      if (!list.length) {
-        body.innerHTML = '<p class="notice-empty">お知らせはありません</p>';
-      } else {
-        body.innerHTML = list.map(n => {
-          const dateStr = n.created_at
-            ? `<span class="notice-date">${escapeHtml(String(n.created_at).slice(0, 10))}</span>`
-            : '';
-          return `<a class="notice-item" href="${safeUrl(n.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(n.title)}${dateStr}</a>`;
-        }).join('');
-      }
+      // キャッシュに保存
+      try {
+        sessionStorage.setItem(NOTICES_CACHE_KEY, JSON.stringify({ data: list, ts: Date.now() }));
+      } catch (_) {}
+      renderNotices(list, body);
     } catch (err) {
       body.innerHTML = '<p class="notice-empty">お知らせはありません</p>';
     }
   }
+
+  function renderNotices(list, body) {
+    if (!list.length) {
+      body.innerHTML = '<p class="notice-empty">お知らせはありません</p>';
+    } else {
+      body.innerHTML = list.map(n => {
+        const dateStr = n.created_at
+          ? `<span class="notice-date">${escapeHtml(String(n.created_at).slice(0, 10))}</span>`
+          : '';
+        return `<a class="notice-item" href="${safeUrl(n.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(n.title)}${dateStr}</a>`;
+      }).join('');
+    }
+  }
+
   loadNotices();
 
   /* モバイル：開閉トグル */
