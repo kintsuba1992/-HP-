@@ -182,15 +182,25 @@
     /* 参加ボタン下の注釈テキスト */
     .join-note {
       text-align: center;
-      font-size: 0.78rem;
-      letter-spacing: 0.08em;
-      color: #FFFFFF;
-      text-shadow: 0 0 10px rgba(0, 200, 255, 0.9), 0 1px 3px rgba(0, 0, 0, 0.9);
-      white-space: nowrap;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      color: var(--cyan);
       text-decoration: none;
-      transition: opacity 0.2s ease;
+      border: 1px solid rgba(0, 200, 255, 0.45);
+      border-radius: 20px;
+      padding: 5px 16px;
+      background: rgba(0, 30, 80, 0.55);
+      backdrop-filter: blur(6px);
+      transition: all 0.25s ease;
+      white-space: nowrap;
+      text-shadow: 0 0 8px rgba(0, 200, 255, 0.6);
+      box-shadow: 0 0 10px rgba(0, 150, 255, 0.2);
     }
-    .join-note:hover { opacity: 0.75; }
+    .join-note:hover {
+      background: rgba(0, 60, 160, 0.65);
+      border-color: rgba(0, 220, 255, 0.8);
+      box-shadow: 0 0 18px rgba(0, 200, 255, 0.4);
+    }
 
     /* ── コピーライト（ナビ右下） ── */
     .copyright-nav {
@@ -311,6 +321,13 @@
       text-decoration: none;
       border-bottom: 1px solid rgba(100, 60, 255, 0.15);
       transition: all 0.2s ease;
+    }
+    .notice-date {
+      display: block;
+      font-size: 0.65rem;
+      color: rgba(150, 145, 190, 0.6);
+      margin-top: 2px;
+      letter-spacing: 0.05em;
     }
     .notice-item:last-child { border-bottom: none; }
     .notice-item:hover {
@@ -541,9 +558,12 @@
       if (!list.length) {
         body.innerHTML = '<p class="notice-empty">お知らせはありません</p>';
       } else {
-        body.innerHTML = list.map(n =>
-          `<a class="notice-item" href="${safeUrl(n.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(n.title)}</a>`
-        ).join('');
+        body.innerHTML = list.map(n => {
+          const dateStr = n.created_at
+            ? `<span class="notice-date">${escapeHtml(String(n.created_at).slice(0, 10))}</span>`
+            : '';
+          return `<a class="notice-item" href="${safeUrl(n.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(n.title)}${dateStr}</a>`;
+        }).join('');
       }
     } catch (err) {
       body.innerHTML = '<p class="notice-empty">お知らせはありません</p>';
