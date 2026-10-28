@@ -534,11 +534,16 @@
     return LUMA_PAST_PAGE_URL;
   }
 
-  function renderPastEvents(events) {
-    if (!events.length) {
-      pastEvents.innerHTML = '<div class="event-empty">過去イベントはまだありません。</div>';
-      return;
-    }
+  function eventUrl(event) {
+  if (event.url) {
+    const url = String(event.url).trim();
+    if (/^https?:\/\//i.test(url)) return url; // 完全URLならそのまま返す
+    const slug = url.replace(/[^a-zA-Z0-9\-_]/g, '');
+    return `https://lu.ma/${slug}`;
+  }
+    
+  return LUMA_PAST_PAGE_URL;
+}
 
     pastEvents.innerHTML = `<div class="event-grid">${events.map(event => {
       const cover    = safeUrl(event.cover_url || event.social_image_url)
