@@ -430,9 +430,11 @@
   const LUMA_EMBED_URL = `https://luma.com/embed/calendar/${LUMA_CALENDAR_ID}/events`;
   const LUMA_PAST_PAGE_URL = `https://luma.com/calendar/${LUMA_CALENDAR_ID}/past-events`;
 
-  // CORS回避用の中継APIを設定してください。
-  // 例: const LUMA_PROXY_URL = 'https://your-worker.example.workers.dev';
+  // Cloudflare Worker（今後のイベント用・継続利用）
   const LUMA_PROXY_URL = 'https://luma-proxy.kintsuba24.workers.dev/';
+
+  // GAS URL（過去イベント取得用）
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbys_YB5UpKqlgSwPygCAd2_1Yix_Hf0Oj9H3e6B7HotP3Iwe8AfO2H6VGvKjg_hVYVq/exec';
 
   const frame      = document.getElementById('lumaFrame');
   const loading    = document.getElementById('lumaLoading');
@@ -479,6 +481,12 @@
   }
 
   function getPastEventsUrl() {
+    // GAS URLが設定されていればGAS経由（Luma IPブロック回避）
+    if (GAS_URL) {
+      const sep = GAS_URL.includes('?') ? '&' : '?';
+      return `${GAS_URL}${sep}type=luma_past`;
+    }
+    // フォールバック：Cloudflare Worker経由
     if (!LUMA_PROXY_URL) return '';
     const separator = LUMA_PROXY_URL.includes('?') ? '&' : '?';
     return `${LUMA_PROXY_URL}${separator}calendar_api_id=${encodeURIComponent(LUMA_CALENDAR_ID)}&period=past`;
