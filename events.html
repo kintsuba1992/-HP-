@@ -527,14 +527,6 @@
   }
 
   function eventUrl(event) {
-    if (event.url) {
-      const slug = String(event.url).replace(/[^a-zA-Z0-9\-_]/g, '');
-      return `https://luma.com/${slug}`;
-    }
-    return LUMA_PAST_PAGE_URL;
-  }
-
-  function eventUrl(event) {
   if (event.url) {
     const url = String(event.url).trim();
     if (/^https?:\/\//i.test(url)) return url; // 完全URLならそのまま返す
