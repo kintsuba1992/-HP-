@@ -537,6 +537,7 @@
   return LUMA_PAST_PAGE_URL;
 }
 
+  function renderPastEvents(events) {
     pastEvents.innerHTML = `<div class="event-grid">${events.map(event => {
       const cover    = safeUrl(event.cover_url || event.social_image_url)
                        || 'https://images.lumacdn.com/social-images/default-2604.png';
